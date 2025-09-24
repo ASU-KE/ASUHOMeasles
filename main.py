@@ -1,8 +1,3 @@
-"""
-Main Application File
-Generates all visualizations and saves them as HTML files for GitHub Pages
-"""
-
 import os
 import sys
 import logging
@@ -25,13 +20,6 @@ logging.basicConfig(
 )
 
 def create_html_page(fig, filename):
-    """
-    Create a simple HTML page with just the visualization for iframe embedding
-    
-    Args:
-        fig: Plotly figure object
-        filename (str): Output filename
-    """
     # Generate the HTML with minimal styling for iframe embedding
     html_content = fig.to_html(
         include_plotlyjs='cdn',
