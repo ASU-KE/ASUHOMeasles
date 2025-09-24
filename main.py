@@ -1,8 +1,3 @@
-"""
-Main Application File
-Generates all visualizations and saves them as HTML files for GitHub Pages
-"""
-
 import os
 import sys
 import logging
