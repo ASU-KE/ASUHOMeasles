@@ -10,9 +10,9 @@ from pathlib import Path
 from datetime import datetime
 
 # Import our modules
-from data_manager import DataManager
-from chart_generators import *
-from table_generators import *
+from data_manager_clean import DataManager
+from original_chart_generators import *
+from original_table_generators import *
 
 # Configure logging
 logging.basicConfig(
@@ -264,7 +264,7 @@ def main():
         
         # Lives saved chart
         try:
-            lives_fig = create_lives_saved_chart(data.get('vaccine_impact', pd.DataFrame()))
+            lives_fig = create_lives_saved_chart_redesigned(data.get('vaccine_impact', pd.DataFrame()))
             create_html_page(lives_fig, "lives_saved.html")
         except Exception as e:
             logging.error(f"Failed to create lives saved chart: {e}")
