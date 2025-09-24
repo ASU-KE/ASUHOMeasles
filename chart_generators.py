@@ -9,12 +9,6 @@ def create_bivariate_choropleth(usmap_data):
     import pandas as pd
     import numpy as np
     from datetime import datetime
-
-    # Your exact 9-color palette arranged in 3x3 matrix
-    # Rows: Case rate (high to low), Cols: MMR coverage (low to high)
-    # Logical progression from red (concerning) to blue"""
-Chart Generation Module - Exact Copies from Original Colab
-Contains all visualization functions exactly as they were in the original notebook
 """
 
 import plotly.graph_objects as go
