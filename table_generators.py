@@ -47,40 +47,31 @@ def create_timeline_table(timeline_data):
 
     return fig
 
-def create_recent_trends_table(usmeasles_data, mmr_data):
+def create_recent_trends_table(usmeasles_data, mmr_data, usmap_data, state_populations, state_abbrev):
     """
-    Create recent trends table exactly as in original Colab
+    Create recent trends table and process state-level data for mapping.
     """
-    # 1. Create a copy of the usmeasles DataFrame and select the 'year' and 'cases' columns.
+
+    # --- Recent Trends ---
     us_data = usmeasles_data[['year', 'cases']].copy()
-
-    # 2. Add a 'Location' column to this copied DataFrame and set its value to 'United States' for all rows.
     us_data['Location'] = 'United States'
-
-    # 3. Remove duplicate rows based on the 'year' column from the copied usmeasles DataFrame.
     us_data = us_data.drop_duplicates(subset=['year'])
 
-    # 4. Create a copy of the mmr DataFrame and select the 'year', 'Location', and 'MMR' columns.
     mmr_clean = mmr_data[['year', 'Location', 'MMR']].copy()
-
-    # 5. Remove duplicate rows based on the 'year' and 'Location' columns from the copied mmr DataFrame.
     mmr_clean = mmr_clean.drop_duplicates(subset=['year', 'Location'])
 
-    # 6. Merge the processed usmeasles and mmr DataFrames on the 'year' and 'Location' columns using a left merge, keeping all rows from the usmeasles DataFrame.
+    # Ensure 'year' is numeric in both DataFrames
+    us_data['year'] = pd.to_numeric(us_data['year'], errors='coerce').astype('Int64')
+    mmr_clean['year'] = pd.to_numeric(mmr_clean['year'], errors='coerce').astype('Int64')
+
     merged_recent_trends = pd.merge(us_data, mmr_clean, on=['year', 'Location'], how='left')
-
-    # 7. Filter the merged DataFrame to include data only for years after 2014.
     merged_recent_trends = merged_recent_trends[merged_recent_trends['year'] > 2014].copy()
-
-    # 8. Sort the filtered DataFrame by 'year' and reset the index.
     merged_recent_trends = merged_recent_trends.sort_values('year').reset_index(drop=True)
 
-    # 9. Convert the 'year', 'cases', and 'MMR' columns to numeric types, coercing errors.
-    numeric_cols = ['year', 'cases', 'MMR']
-    for col in numeric_cols:
-        merged_recent_trends[col] = pd.to_numeric(merged_recent_trends[col], errors='coerce')
+    for col in ['year', 'cases', 'MMR']:
+        if col in merged_recent_trends.columns:
+            merged_recent_trends[col] = pd.to_numeric(merged_recent_trends[col], errors='coerce')
 
-    # 10. Drop rows with missing values in the 'year' and 'cases' columns.
     merged_recent_trends = merged_recent_trends.dropna(subset=['year', 'cases'])
 
     # 11. Create a Plotly table using go.Figure and go.Table.
@@ -215,21 +206,20 @@ def create_state_map_table(usmap_data):
         'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
     }
 
-    # 1. Create a copy of the `usmap` DataFrame.
     df_usmap = usmap_data.copy()
 
-    # 4. Identify the column containing case data.
+    # Identify the cases column
     cases_col = next((c for c in ['cases_calendar_year', 'cases', 'Cases'] if c in df_usmap.columns), None)
 
-    # 5. Calculate the `case_rate` per 100,000 population, handling potential division by zero and missing population data by filling with 0. Round the result to 2 decimal places.
-    df_usmap['population'] = df_usmap['geography'].map(state_populations)
+    # Ensure numeric before division
+    df_usmap['population'] = pd.to_numeric(df_usmap['geography'].map(state_populations), errors='coerce')
+    df_usmap[cases_col] = pd.to_numeric(df_usmap[cases_col], errors='coerce')
+
     df_usmap['case_rate'] = (df_usmap[cases_col] / df_usmap['population'] * 100000).round(2).fillna(0)
-
-    # 6. Map state names to their abbreviations and store them in a new column named `state_code`.
     df_usmap['state_code'] = df_usmap['geography'].map(state_abbrev)
-
-    # 7. Convert the 'Estimate (%)' column to numeric, coercing errors.
     df_usmap['Estimate (%)'] = pd.to_numeric(df_usmap['Estimate (%)'], errors='coerce')
+
+    return merged_recent_trends, df_usmap
 
     # 8. Define a function `classify_detailed_bivariate` that takes a case rate and MMR coverage as input and returns the case class (0, 1, or 2), MMR class (0, 1, or 2), and a detailed category label based on predefined thresholds.
     def classify_detailed_bivariate(case_rate, mmr_coverage):
