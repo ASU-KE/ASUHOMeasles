@@ -234,8 +234,12 @@ class DataManager:
             usmap_cases = raw_data['usmap_cases']
             
             # Debug: Check data types
-            logging.info(f"mmr_map type: {type(mmr_map)}, columns: {list(mmr_map.columns) if hasattr(mmr_map, 'columns') else 'No columns'}")
-            logging.info(f"usmap_cases type: {type(usmap_cases)}, columns: {list(usmap_cases.columns) if hasattr(usmap_cases, 'columns') else 'No columns'}")
+            logging.info(f"mmr_map type: {type(mmr_map)}, shape: {mmr_map.shape}, columns: {list(mmr_map.columns)}")
+            logging.info(f"usmap_cases type: {type(usmap_cases)}, shape: {usmap_cases.shape}, columns: {list(usmap_cases.columns)}")
+            
+            # Show sample data
+            logging.info(f"Sample mmr_map data:\n{mmr_map.head()}")
+            logging.info(f"Sample usmap_cases data:\n{usmap_cases.head()}")
             
             # Ensure both are DataFrames
             if not isinstance(mmr_map, pd.DataFrame):
@@ -247,9 +251,31 @@ class DataManager:
             
             # Merge map data
             usmap = usmap_cases.merge(mmr_map, on='geography', how='left')
-            usmap = usmap[usmap['year_x'] == 2025].copy()
-            usmap['Estimate (%)'] = pd.to_numeric(usmap['Estimate (%)'], errors='coerce')
-            processed['usmap'] = usmap
+            
+            # Debug merge results
+            logging.info(f"After merge, usmap has {len(usmap)} rows")
+            logging.info(f"Merge columns: {list(usmap.columns)}")
+            
+            # Check available years after merge
+            if 'year_x' in usmap.columns:
+                available_years = usmap['year_x'].dropna().unique()
+                logging.info(f"Available years in merged data: {sorted(available_years)}")
+            
+            # Filter to 2025 as specified in original code
+            usmap_2025 = usmap[usmap['year_x'] == 2025].copy()
+            logging.info(f"After filtering to 2025: {len(usmap_2025)} rows")
+            
+            # If no 2025 data, let's see what years we do have
+            if len(usmap_2025) == 0:
+                logging.warning("No 2025 data found. Checking for most recent year instead...")
+                if len(usmap) > 0:
+                    most_recent_year = usmap['year_x'].max()
+                    logging.info(f"Most recent year available: {most_recent_year}")
+                    usmap_2025 = usmap[usmap['year_x'] == most_recent_year].copy()
+                    logging.info(f"Using {most_recent_year} data: {len(usmap_2025)} rows")
+            
+            usmap_2025['Estimate (%)'] = pd.to_numeric(usmap_2025['Estimate (%)'], errors='coerce')
+            processed['usmap'] = usmap_2025
             logging.info("Processed map data successfully")
             
             # Process vaccine impact data
