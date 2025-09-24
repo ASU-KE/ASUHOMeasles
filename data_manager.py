@@ -179,8 +179,8 @@ class DataManager:
             downloaded_data = self.download_data(url)
             
             if downloaded_data is not None:
-                # Convert to DataFrame if JSON
-                if isinstance(downloaded_data, dict):
+                # Convert to DataFrame - handle both dict and list formats from JSON APIs
+                if isinstance(downloaded_data, (dict, list)):
                     downloaded_data = pd.DataFrame(downloaded_data)
                     
                 data[key] = downloaded_data
@@ -191,7 +191,7 @@ class DataManager:
                 # Try to load from backup
                 backup_data = self.load_backup(key)
                 if backup_data is not None:
-                    if isinstance(backup_data, dict):
+                    if isinstance(backup_data, (dict, list)):
                         backup_data = pd.DataFrame(backup_data)
                     data[key] = backup_data
                     logging.warning(f"Using backup data for: {key}")
@@ -215,44 +215,83 @@ class DataManager:
         """
         processed = {}
         
-        # Timeline data - already clean
-        processed['timeline'] = raw_data['timeline']
-        
-        # US Measles data - already clean
-        processed['usmeasles'] = raw_data['usmeasles']
-        
-        # MMR Coverage data
-        processed['mmr'] = raw_data['mmr']
-        
-        # Process map data
-        mmr_map = raw_data['mmr_map'].rename(columns={'Geography': 'geography'})
-        usmap_cases = raw_data['usmap_cases']
-        
-        # Merge map data
-        usmap = usmap_cases.merge(mmr_map, on='geography', how='left')
-        usmap = usmap[usmap['year_x'] == 2025].copy()
-        usmap['Estimate (%)'] = pd.to_numeric(usmap['Estimate (%)'], errors='coerce')
-        processed['usmap'] = usmap
-        
-        # Process vaccine impact data
-        vax_df = raw_data['vaccine_with']
-        no_vax_df = raw_data['vaccine_without']
-        
-        vax_usa = vax_df[vax_df['iso'] == 'USA'].copy()
-        no_vax_usa = no_vax_df[no_vax_df['iso'] == 'USA'].copy()
-        
-        merged_vaccine = pd.merge(no_vax_usa, vax_usa, on='year', suffixes=('_no_vaccine', '_vaccine'))
-        merged_vaccine['lives_saved'] = (merged_vaccine['mean_deaths_no_vaccine'] - 
-                                       merged_vaccine['mean_deaths_vaccine'])
-        merged_vaccine['lives_saved_ub'] = (merged_vaccine['ub_deaths_no_vaccine'] - 
-                                          merged_vaccine['lb_deaths_vaccine'])
-        merged_vaccine['lives_saved_lb'] = (merged_vaccine['lb_deaths_no_vaccine'] - 
-                                          merged_vaccine['ub_deaths_vaccine'])
-        merged_vaccine = merged_vaccine.sort_values('year')
-        
-        processed['vaccine_impact'] = merged_vaccine
-        
-        return processed
+        try:
+            # Timeline data - already clean
+            processed['timeline'] = raw_data['timeline']
+            logging.info("Processed timeline data successfully")
+            
+            # US Measles data - already clean
+            processed['usmeasles'] = raw_data['usmeasles']
+            logging.info("Processed US measles data successfully")
+            
+            # MMR Coverage data
+            processed['mmr'] = raw_data['mmr']
+            logging.info("Processed MMR data successfully")
+            
+            # Process map data
+            logging.info("Processing map data...")
+            mmr_map = raw_data['mmr_map'].rename(columns={'Geography': 'geography'})
+            usmap_cases = raw_data['usmap_cases']
+            
+            # Debug: Check data types
+            logging.info(f"mmr_map type: {type(mmr_map)}, columns: {list(mmr_map.columns) if hasattr(mmr_map, 'columns') else 'No columns'}")
+            logging.info(f"usmap_cases type: {type(usmap_cases)}, columns: {list(usmap_cases.columns) if hasattr(usmap_cases, 'columns') else 'No columns'}")
+            
+            # Ensure both are DataFrames
+            if not isinstance(mmr_map, pd.DataFrame):
+                logging.error(f"mmr_map is not a DataFrame: {type(mmr_map)}")
+                return None
+            if not isinstance(usmap_cases, pd.DataFrame):
+                logging.error(f"usmap_cases is not a DataFrame: {type(usmap_cases)}")
+                return None
+            
+            # Merge map data
+            usmap = usmap_cases.merge(mmr_map, on='geography', how='left')
+            usmap = usmap[usmap['year_x'] == 2025].copy()
+            usmap['Estimate (%)'] = pd.to_numeric(usmap['Estimate (%)'], errors='coerce')
+            processed['usmap'] = usmap
+            logging.info("Processed map data successfully")
+            
+            # Process vaccine impact data
+            logging.info("Processing vaccine impact data...")
+            vax_df = raw_data['vaccine_with']
+            no_vax_df = raw_data['vaccine_without']
+            
+            # Debug: Check vaccine data types
+            logging.info(f"vax_df type: {type(vax_df)}")
+            logging.info(f"no_vax_df type: {type(no_vax_df)}")
+            
+            # Ensure vaccine data are DataFrames
+            if not isinstance(vax_df, pd.DataFrame):
+                logging.error(f"vax_df is not a DataFrame: {type(vax_df)}")
+                return None
+            if not isinstance(no_vax_df, pd.DataFrame):
+                logging.error(f"no_vax_df is not a DataFrame: {type(no_vax_df)}")
+                return None
+            
+            vax_usa = vax_df[vax_df['iso'] == 'USA'].copy()
+            no_vax_usa = no_vax_df[no_vax_df['iso'] == 'USA'].copy()
+            
+            merged_vaccine = pd.merge(no_vax_usa, vax_usa, on='year', suffixes=('_no_vaccine', '_vaccine'))
+            merged_vaccine['lives_saved'] = (merged_vaccine['mean_deaths_no_vaccine'] - 
+                                           merged_vaccine['mean_deaths_vaccine'])
+            merged_vaccine['lives_saved_ub'] = (merged_vaccine['ub_deaths_no_vaccine'] - 
+                                              merged_vaccine['lb_deaths_vaccine'])
+            merged_vaccine['lives_saved_lb'] = (merged_vaccine['lb_deaths_no_vaccine'] - 
+                                              merged_vaccine['ub_deaths_vaccine'])
+            merged_vaccine = merged_vaccine.sort_values('year')
+            
+            processed['vaccine_impact'] = merged_vaccine
+            logging.info("Processed vaccine impact data successfully")
+            
+            return processed
+            
+        except Exception as e:
+            logging.error(f"Error in process_data: {e}")
+            logging.error(f"Available keys in raw_data: {list(raw_data.keys())}")
+            for key, value in raw_data.items():
+                logging.error(f"{key}: type={type(value)}, shape={getattr(value, 'shape', 'No shape')}")
+            return None
 
     def validate_data(self, data):
         """
