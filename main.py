@@ -1,11 +1,17 @@
+"""
+Main Application File
+Generates all visualizations and saves them as HTML files for GitHub Pages
+"""
+
 import os
 import sys
 import logging
 from pathlib import Path
 from datetime import datetime
+import pandas as pd
 
 # Import our modules
-from data_manager import *
+from data_manager import DataManager
 from chart_generators import *
 from table_generators import *
 
@@ -20,6 +26,13 @@ logging.basicConfig(
 )
 
 def create_html_page(fig, filename):
+    """
+    Create a simple HTML page with just the visualization for iframe embedding
+    
+    Args:
+        fig: Plotly figure object
+        filename (str): Output filename
+    """
     # Generate the HTML with minimal styling for iframe embedding
     html_content = fig.to_html(
         include_plotlyjs='cdn',
@@ -252,7 +265,7 @@ def main():
         
         # Lives saved chart
         try:
-            lives_fig = create_lives_saved_chart_redesigned(data.get('vaccine_impact', pd.DataFrame()))
+            lives_fig = create_lives_saved_chart(data.get('vaccine_impact', pd.DataFrame()))
             create_html_page(lives_fig, "lives_saved.html")
         except Exception as e:
             logging.error(f"Failed to create lives saved chart: {e}")
