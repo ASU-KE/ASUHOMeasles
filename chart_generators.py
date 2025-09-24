@@ -1,16 +1,3 @@
-return fig
-
-def create_bivariate_choropleth(usmap_data):
-    """
-    Creates a bivariate choropleth map showing both MMR coverage and measles case rates
-    with improved spacing and properly positioned state abbreviations.
-    """
-    import plotly.graph_objects as go
-    import pandas as pd
-    import numpy as np
-    from datetime import datetime
-"""
-
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
@@ -18,16 +5,6 @@ import math
 from datetime import datetime
 
 def create_measles_timeline(timeline_data):
-    """
-    Creates a timeline chart showing measles cases over time with key vaccine milestones.
-    Uses square root scaling to display both historical peaks and recent trends.
-
-    Args:
-        timeline_data: DataFrame with columns 'Year', 'Cases', optional 'Highlight'
-
-    Returns:
-        plotly Figure object
-    """
     import numpy as np
     import pandas as pd
     import plotly.graph_objects as go
@@ -307,17 +284,6 @@ def create_measles_timeline(timeline_data):
     return fig
 
 def create_recent_trends(usmeasles_data, mmr_data):
-    """
-    Creates a dual-axis chart showing recent measles cases (bars) and MMR vaccination
-    coverage (line) with herd immunity threshold.
-
-    Args:
-        usmeasles_data: DataFrame with columns 'year', 'cases'
-        mmr_data: DataFrame with columns 'year', 'Location', 'MMR'
-
-    Returns:
-        plotly Figure object
-    """
     import pandas as pd
     import plotly.graph_objects as go
 
@@ -570,14 +536,6 @@ def create_recent_trends(usmeasles_data, mmr_data):
     return fig
 
 def create_rnaught_comparison():
-    """
-    Creates a comparative visualization of basic reproduction numbers (R₀) across diseases.
-    Shows how many people each infected person could potentially infect using a dot plot
-    where each circle represents 20 people.
-
-    Returns:
-        plotly Figure object
-    """
     import numpy as np
     import pandas as pd
     import plotly.graph_objects as go
@@ -774,10 +732,6 @@ def create_rnaught_comparison():
     return fig
 
 def create_bivariate_choropleth(usmap_data):
-    """
-    Creates a bivariate choropleth map showing both MMR coverage and measles case rates
-    with improved spacing and properly positioned state abbreviations.
-    """
     import plotly.graph_objects as go
     import pandas as pd
     import numpy as np
@@ -1158,10 +1112,6 @@ def create_bivariate_choropleth(usmap_data):
     return fig
 
 def create_lives_saved_chart_redesigned(vaccine_impact_data):
-    """
-    Create bar chart visualization of estimated lives saved by vaccination programs
-    with discrete color bins and clean styling.
-    """
     import plotly.graph_objects as go
     import pandas as pd
     import numpy as np
@@ -1397,21 +1347,10 @@ def create_lives_saved_chart_redesigned(vaccine_impact_data):
     return fig    return fig
 
 def create_bivariate_choropleth(usmap_data):
-    """
-    Creates a bivariate choropleth map showing both MMR coverage and measles case rates
-    with improved spacing and properly positioned state abbreviations.
-    """
     import plotly.graph_objects as go
     import pandas as pd
     import numpy as np
     from datetime import datetime
-
-    # Your exact 9-color palette arranged in 3x3 matrix
-    # Rows: Case rate (high to low), Cols: MMR coverage (low to high)
-    # Logical progression from red (concerning) to blue"""
-Chart Generation Module - Exact Copies from Original Colab
-Contains all visualization functions exactly as they were in the original notebook
-"""
 
 import plotly.graph_objects as go
 import pandas as pd
@@ -1420,16 +1359,6 @@ import math
 from datetime import datetime
 
 def create_measles_timeline(timeline_data):
-    """
-    Creates a timeline chart showing measles cases over time with key vaccine milestones.
-    Uses square root scaling to display both historical peaks and recent trends.
-
-    Args:
-        timeline_data: DataFrame with columns 'Year', 'Cases', optional 'Highlight'
-
-    Returns:
-        plotly Figure object
-    """
     import numpy as np
     import pandas as pd
     import plotly.graph_objects as go
@@ -1709,17 +1638,6 @@ def create_measles_timeline(timeline_data):
     return fig
 
 def create_recent_trends(usmeasles_data, mmr_data):
-    """
-    Creates a dual-axis chart showing recent measles cases (bars) and MMR vaccination
-    coverage (line) with herd immunity threshold.
-
-    Args:
-        usmeasles_data: DataFrame with columns 'year', 'cases'
-        mmr_data: DataFrame with columns 'year', 'Location', 'MMR'
-
-    Returns:
-        plotly Figure object
-    """
     import pandas as pd
     import plotly.graph_objects as go
 
@@ -1972,14 +1890,6 @@ def create_recent_trends(usmeasles_data, mmr_data):
     return fig
 
 def create_rnaught_comparison():
-    """
-    Creates a comparative visualization of basic reproduction numbers (R₀) across diseases.
-    Shows how many people each infected person could potentially infect using a dot plot
-    where each circle represents 20 people.
-
-    Returns:
-        plotly Figure object
-    """
     import numpy as np
     import pandas as pd
     import plotly.graph_objects as go
