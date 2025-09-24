@@ -1,0 +1,184 @@
+name: Update Measles Data Visualization
+
+on:
+  # Run daily at 6 AM UTC (1 AM EST, 11 PM PST previous day)
+  schedule:
+    - cron: '0 6 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Force refresh all data (ignore cache)'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Run on push to main branch for testing
+  push:
+    branches: [ main ]
+
+jobs:
+  update-visualizations:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # Allow pushing changes back to repo
+      pages: write     # Allow deploying to GitHub Pages
+      id-token: write  # Allow OIDC token for Pages deployment
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper git operations
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create data directories
+      run: |
+        mkdir -p data/backups
+        mkdir -p docs
+
+    - name: Run data update and visualization generation
+      run: |
+        python main.py
+      env:
+        FORCE_REFRESH: ${{ github.event.inputs.force_refresh || 'false' }}
+
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "Changes detected:"
+          git status --short
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
+        fi
+
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Auto-update measles visualizations - $(date -u +%Y-%m-%d\ %H:%M\ UTC)"
+        git push
+
+    - name: Setup Pages
+      if: steps.verify-changed-files.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+      uses: actions/configure-pages@v3
+
+    - name: Upload to GitHub Pages
+      if: steps.verify-changed-files.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: ./docs
+
+    - name: Deploy to GitHub Pages
+      if: steps.verify-changed-files.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+    - name: Log completion
+      run: |
+        echo "Workflow completed at $(date -u +%Y-%m-%d\ %H:%M\ UTC)"
+        echo "Site URL: ${{ steps.deployment.outputs.page_url }}"
+
+  # Job to clean up old backups (keep last 30 days)
+  cleanup-backups:
+    runs-on: ubuntu-latest
+    needs: update-visualizations
+    if: success()
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Clean up old backups
+      run: |
+        # Remove backup files older than 30 days
+        find data/backups -name "*.csv" -mtime +30 -delete
+        find data/backups -name "*.json" -mtime +30 -delete
+        
+        # Count remaining files
+        backup_count=$(find data/backups -type f | wc -l)
+        echo "Remaining backup files: $backup_count"
+
+    - name: Commit backup cleanup
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/backups
+          git commit -m "Cleanup old backup files - $(date -u +%Y-%m-%d)"
+          git push
+        fi
+
+  # Health check job to verify site is working
+  health-check:
+    runs-on: ubuntu-latest
+    needs: update-visualizations
+    if: success()
+    
+    steps:
+    - name: Wait for deployment
+      run: sleep 60  # Give Pages time to deploy
+      
+    - name: Check site health
+      run: |
+        # Get the repository info to construct the Pages URL
+        REPO_NAME="${GITHUB_REPOSITORY#*/}"
+        OWNER="${GITHUB_REPOSITORY%/*}"
+        SITE_URL="https://${OWNER}.github.io/${REPO_NAME}"
+        
+        echo "Checking site health at: $SITE_URL"
+        
+        # Check if the main page loads
+        if curl -f -s -I "$SITE_URL" > /dev/null; then
+          echo "✓ Site is accessible"
+        else
+          echo "✗ Site health check failed"
+          exit 1
+        fi
+        
+        # Check if key pages load
+        for page in timeline.html recent_trends.html state_map.html; do
+          if curl -f -s -I "$SITE_URL/$page" > /dev/null; then
+            echo "✓ $page is accessible"
+          else
+            echo "✗ $page health check failed"
+          fi
+        done
+        
+        echo "Site URL: $SITE_URL"
+
+  # Send notification on failure (optional - requires setup)
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [update-visualizations, cleanup-backups, health-check]
+    if: failure()
+    
+    steps:
+    - name: Notify on workflow failure
+      run: |
+        echo "Workflow failed. Consider setting up notifications here."
+        echo "Failed at: $(date -u +%Y-%m-%d\ %H:%M\ UTC)"
+        echo "Repository: $GITHUB_REPOSITORY"
+        echo "Run ID: $GITHUB_RUN_ID"
+        
+        # Example: You can add Slack webhook, email, or other notifications here
+        # curl -X POST -H 'Content-type: application/json' \
+        #   --data '{"text":"Measles viz update failed!"}' \
+        #   $SLACK_WEBHOOK_URL
