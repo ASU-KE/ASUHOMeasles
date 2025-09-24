@@ -1,8 +1,3 @@
-"""
-Table Generation Module - Exact Copies from Original Colab
-Contains all table functions exactly as they were in the original notebook
-"""
-
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
