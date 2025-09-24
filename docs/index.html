@@ -4,193 +4,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measles Data Visualization Dashboard</title>
-    <meta name="description" content="Interactive visualizations of measles case data, vaccination coverage, and public health trends">
+    <title>Measles Data Visualizations</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
+            max-width: 800px;
+            margin: 50px auto;
             padding: 20px;
-            background-color: #f5f5f5;
             line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         h1 {
             color: #333;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
         }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.2em;
+        .link-list {
+            list-style: none;
+            padding: 0;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin: 40px 0;
-        }
-        .card {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 25px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .card h3 {
-            margin-top: 0;
-            color: #007bff;
-            font-size: 1.3em;
-        }
-        .card p {
-            color: #666;
+        .link-list li {
             margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
         }
-        .card-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .btn {
-            padding: 8px 16px;
+        .link-list a {
+            color: #007bff;
             text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.2s;
+            font-weight: bold;
+            font-size: 16px;
         }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
+        .link-list a:hover {
+            text-decoration: underline;
         }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #545b62;
+        .description {
+            color: #666;
+            margin-top: 5px;
+            font-size: 14px;
         }
         .footer {
             text-align: center;
             margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
             color: #666;
-        }
-        .key-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-            text-align: center;
-        }
-        .stat-box {
-            background-color: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2196f3;
-        }
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            color: #1976d2;
-        }
-        .stat-label {
-            color: #666;
-            margin-top: 5px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Measles Data Visualization</h1>
-        <div class="subtitle">Interactive visualizations of measles case data, vaccination coverage, and public health trends</div>
-        
-        <div class="key-stats">
-            <div class="stat-box">
-                <div class="stat-number">18</div>
-                <div class="stat-label">R₀ Value for Measles<br>(Most Contagious)</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">95%</div>
-                <div class="stat-label">Vaccination Rate Needed<br>for Herd Immunity</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">1963</div>
-                <div class="stat-label">Year MMR Vaccine<br>Was Licensed</div>
-            </div>
-        </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h3>Historical Timeline</h3>
-                <p>Explore measles case trends from 1944 to present, with key vaccine milestones and public health events highlighted.</p>
-                <div class="card-links">
-                    <a href="timeline.html" class="btn btn-primary">View Chart</a>
-                    <a href="timeline_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Recent Trends</h3>
-                <p>Recent measles cases and vaccination coverage rates, showing the relationship between immunization and disease prevention.</p>
-                <div class="card-links">
-                    <a href="recent_trends.html" class="btn btn-primary">View Chart</a>
-                    <a href="recent_trends_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Disease Comparison</h3>
-                <p>Compare the contagiousness of measles with other diseases using basic reproduction number (R₀) values.</p>
-                <div class="card-links">
-                    <a href="rnaught_comparison.html" class="btn btn-primary">View Chart</a>
-                    <a href="rnaught_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>State-by-State Analysis</h3>
-                <p>Interactive map showing measles case rates and vaccination coverage by state, with bivariate color coding.</p>
-                <div class="card-links">
-                    <a href="state_map.html" class="btn btn-primary">View Map</a>
-                    <a href="state_map_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Lives Saved by Vaccination</h3>
-                <p>Estimated lives saved through measles vaccination programs, based on WHO modeling data.</p>
-                <div class="card-links">
-                    <a href="lives_saved.html" class="btn btn-primary">View Chart</a>
-                    <a href="lives_saved_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p><strong>About This Dashboard:</strong> This visualization dashboard presents measles surveillance data from the CDC, WHO, and state health departments. All visualizations are automatically updated daily with the latest available data.</p>
-            <p><strong>Data Sources:</strong> CDC Wonder, WHO Vaccine Impact Database, State Health Department Reports</p>
-            <p>Last updated: September 24, 2025 at 06:04 PM</p>
-            <p><a href="https://github.com/yourusername/measles-viz" target="_blank">View Source Code on GitHub</a></p>
-        </div>
+    <h1>Measles Data Visualizations</h1>
+    <p>Individual visualizations for iframe embedding:</p>
+    
+    <ul class="link-list">
+        <li>
+            <a href="timeline.html" target="_blank">Historical Timeline</a>
+            <div class="description">Historical measles cases with vaccine milestones</div>
+        </li>
+        <li>
+            <a href="recent_trends.html" target="_blank">Recent Trends</a>
+            <div class="description">Recent cases and vaccination coverage</div>
+        </li>
+        <li>
+            <a href="rnaught_comparison.html" target="_blank">Disease Comparison</a>
+            <div class="description">Contagiousness comparison across diseases</div>
+        </li>
+        <li>
+            <a href="state_map.html" target="_blank">State Map</a>
+            <div class="description">State-by-state cases and vaccination coverage</div>
+        </li>
+        <li>
+            <a href="lives_saved.html" target="_blank">Lives Saved</a>
+            <div class="description">Estimated lives saved by vaccination</div>
+        </li>
+        <li>
+            <a href="timeline_table.html" target="_blank">Timeline Data Table</a>
+            <div class="description">Historical data in table format</div>
+        </li>
+        <li>
+            <a href="recent_trends_table.html" target="_blank">Recent Trends Table</a>
+            <div class="description">Recent data in table format</div>
+        </li>
+        <li>
+            <a href="rnaught_table.html" target="_blank">Disease R0 Table</a>
+            <div class="description">Disease reproduction numbers</div>
+        </li>
+        <li>
+            <a href="state_map_table.html" target="_blank">State Data Table</a>
+            <div class="description">State-by-state data in table format</div>
+        </li>
+        <li>
+            <a href="lives_saved_table.html" target="_blank">Lives Saved Table</a>
+            <div class="description">Lives saved data in table format</div>
+        </li>
+    </ul>
+    
+    <div class="footer">
+        <p>Last updated: September 24, 2025 at 06:11 PM</p>
+        <p>Data automatically refreshes daily</p>
     </div>
 </body>
 </html>
