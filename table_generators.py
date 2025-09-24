@@ -1,3 +1,8 @@
+"""
+Table Generation Module - Exact Copies from Original Colab
+Contains all table functions exactly as they were in the original notebook
+"""
+
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
@@ -47,44 +52,42 @@ def create_timeline_table(timeline_data):
 
     return fig
 
-def create_recent_trends_table(usmeasles_data, mmr_data, usmap_data, state_populations, state_abbrev):
+def create_recent_trends_table(usmeasles_data, mmr_data):
     """
-    Create recent trends table and process state-level data for mapping.
+    Create recent trends table exactly as in original Colab
     """
-
-        # --- Recent Trends ---
     # 1. Create a copy of the usmeasles DataFrame and select the 'year' and 'cases' columns.
-    us_data = data['usmeasles'][['year', 'cases']].copy()
-    
+    us_data = usmeasles_data[['year', 'cases']].copy()
+
     # 2. Add a 'Location' column to this copied DataFrame and set its value to 'United States' for all rows.
     us_data['Location'] = 'United States'
-    
+
     # 3. Remove duplicate rows based on the 'year' column from the copied usmeasles DataFrame.
     us_data = us_data.drop_duplicates(subset=['year'])
-    
+
     # 4. Create a copy of the mmr DataFrame and select the 'year', 'Location', and 'MMR' columns.
-    mmr_clean = data['mmr'][['year', 'Location', 'MMR']].copy()
-    
+    mmr_clean = mmr_data[['year', 'Location', 'MMR']].copy()
+
     # 5. Remove duplicate rows based on the 'year' and 'Location' columns from the copied mmr DataFrame.
     mmr_clean = mmr_clean.drop_duplicates(subset=['year', 'Location'])
-    
+
     # 6. Merge the processed usmeasles and mmr DataFrames on the 'year' and 'Location' columns using a left merge, keeping all rows from the usmeasles DataFrame.
     merged_recent_trends = pd.merge(us_data, mmr_clean, on=['year', 'Location'], how='left')
-    
+
     # 7. Filter the merged DataFrame to include data only for years after 2014.
     merged_recent_trends = merged_recent_trends[merged_recent_trends['year'] > 2014].copy()
-    
+
     # 8. Sort the filtered DataFrame by 'year' and reset the index.
     merged_recent_trends = merged_recent_trends.sort_values('year').reset_index(drop=True)
-    
+
     # 9. Convert the 'year', 'cases', and 'MMR' columns to numeric types, coercing errors.
     numeric_cols = ['year', 'cases', 'MMR']
     for col in numeric_cols:
         merged_recent_trends[col] = pd.to_numeric(merged_recent_trends[col], errors='coerce')
-    
+
     # 10. Drop rows with missing values in the 'year' and 'cases' columns.
     merged_recent_trends = merged_recent_trends.dropna(subset=['year', 'cases'])
-    
+
     # 11. Create a Plotly table using go.Figure and go.Table.
     fig = go.Figure(data=[go.Table(
         # 12. Define the table header with bold text for 'Year', 'Confirmed Measles Cases', and 'MMR Coverage (%)', using Arial font size 12 and black color, with a background color of '#D0D0D0' and left alignment.
@@ -102,7 +105,7 @@ def create_recent_trends_table(usmeasles_data, mmr_data, usmap_data, state_popul
             align='left'
         )
     )])
-    
+
     # 14. Update the figure layout to set the default font to Arial size 12.
     fig.update_layout(
         font=dict(family="Arial", size=12),
@@ -110,7 +113,7 @@ def create_recent_trends_table(usmeasles_data, mmr_data, usmap_data, state_popul
         autosize=True,
         margin=dict(l=20, r=20, t=20, b=100) # Add some margin
     )
-    
+
     # Add Last refreshed note
     fig.add_annotation(
         text=f"<b>Last refreshed:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}",
@@ -186,9 +189,7 @@ def create_state_map_table(usmap_data):
     """
     Create state map table exactly as in original Colab
     """
-    df_usmap = data['usmap'].copy()
-    
-    # 2. Define a dictionary `state_populations` mapping state names to their populations.
+    # State population lookup
     state_populations = {
         'Alabama': 5108468, 'Alaska': 733406, 'Arizona': 7431344, 'Arkansas': 3067732,
         'California': 38965193, 'Colorado': 5877610, 'Connecticut': 3617176, 'Delaware': 1031890,
@@ -204,8 +205,8 @@ def create_state_map_table(usmap_data):
         'Vermont': 647464, 'Virginia': 8715698, 'Washington': 7812880, 'West Virginia': 1770071,
         'Wisconsin': 5910955, 'Wyoming': 584057
     }
-    
-    # 3. Define a dictionary `state_abbrev` mapping state names to their abbreviations.
+
+    # State abbreviations
     state_abbrev = {
         'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
         'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
@@ -218,105 +219,108 @@ def create_state_map_table(usmap_data):
         'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
         'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
     }
-    
+
+    # 1. Create a copy of the `usmap` DataFrame.
+    df_usmap = usmap_data.copy()
+
     # 4. Identify the column containing case data.
     cases_col = next((c for c in ['cases_calendar_year', 'cases', 'Cases'] if c in df_usmap.columns), None)
-    
+
     # 5. Calculate the `case_rate` per 100,000 population, handling potential division by zero and missing population data by filling with 0. Round the result to 2 decimal places.
     df_usmap['population'] = df_usmap['geography'].map(state_populations)
     df_usmap['case_rate'] = (df_usmap[cases_col] / df_usmap['population'] * 100000).round(2).fillna(0)
-    
+
     # 6. Map state names to their abbreviations and store them in a new column named `state_code`.
     df_usmap['state_code'] = df_usmap['geography'].map(state_abbrev)
-    
+
     # 7. Convert the 'Estimate (%)' column to numeric, coercing errors.
     df_usmap['Estimate (%)'] = pd.to_numeric(df_usmap['Estimate (%)'], errors='coerce')
 
-    return merged_recent_trends, df_usmap
-
     # 8. Define a function `classify_detailed_bivariate` that takes a case rate and MMR coverage as input and returns the case class (0, 1, or 2), MMR class (0, 1, or 2), and a detailed category label based on predefined thresholds.
     def classify_detailed_bivariate(case_rate, mmr_coverage):
-    """Classify states into detailed 3x3 bivariate categories"""
-    # Case rate classification (0=high, 1=medium, 2=low)
-    if case_rate <= 1.0:
-        case_class = 2  # Low cases (bottom row)
-    elif case_rate <= 3.0:
-        case_class = 1  # Medium cases (middle row)
-    else:
-        case_class = 0  # High cases (top row)
+        """Classify states into detailed 3x3 bivariate categories"""
+        # Case rate classification (0=high, 1=medium, 2=low)
+        if case_rate <= 1.0:
+            case_class = 2  # Low cases (bottom row)
+        elif case_rate <= 3.0:
+            case_class = 1  # Medium cases (middle row)
+        else:
+            case_class = 0  # High cases (top row)
 
-    # MMR coverage classification (0=low, 1=medium, 2=high)
-    if mmr_coverage < 92:
-        mmr_class = 0  # Low coverage
-    elif mmr_coverage < 96:
-        mmr_class = 1  # Medium coverage
-    else:
-        mmr_class = 2  # High coverage
+        # MMR coverage classification (0=low, 1=medium, 2=high)
+        if mmr_coverage < 92:
+            mmr_class = 0  # Low coverage
+        elif mmr_coverage < 96:
+            mmr_class = 1  # Medium coverage
+        else:
+            mmr_class = 2  # High coverage
 
-    category_labels = [
-        ["High Cases, Low Vaccination", "High Cases, Medium Vaccination", "High Cases, High Vaccination"],
-        ["Medium Cases, Low Vaccination", "Medium Cases, Medium Vaccination", "Medium Cases, High Vaccination"],
-        ["Low Cases, Low Vaccination", "Low Cases, Medium Vaccination", "Low Cases, High Vaccination"]
-    ]
+        category_labels = [
+            ["High Cases, Low Vaccination", "High Cases, Medium Vaccination", "High Cases, High Vaccination"],
+            ["Medium Cases, Low Vaccination", "Medium Cases, Medium Vaccination", "Medium Cases, High Vaccination"],
+            ["Low Cases, Low Vaccination", "Low Cases, Medium Vaccination", "Low Cases, High Vaccination"]
+        ]
 
-    if pd.isna(case_rate) or pd.isna(mmr_coverage):
-        return None, None, "Missing Data"
-    else:
-        return case_class, mmr_class, category_labels[case_class][mmr_class]
+        if pd.isna(case_rate) or pd.isna(mmr_coverage):
+            return None, None, "Missing Data"
+        else:
+            return case_class, mmr_class, category_labels[case_class][mmr_class]
 
-# 9. Apply the `classify_detailed_bivariate` function to the DataFrame to create new columns: `case_class`, `mmr_class`, and `category_label`.
-classification_results = df_usmap.apply(
-    lambda row: classify_detailed_bivariate(row['case_rate'], row['Estimate (%)']), axis=1
-)
-
-df_usmap['case_class'] = [result[0] for result in classification_results]
-df_usmap['mmr_class'] = [result[1] for result in classification_results]
-df_usmap['category_label'] = [result[2] for result in classification_results]
-
-# 10. Create a Plotly table using `go.Figure` and `go.Table`.
-fig = go.Figure(data=[go.Table(
-    # 11. Define the table header with bold text for 'State', 'Abbr.', 'Total Measles Cases', 'Population', 'Measles Case Rate (per 100K)', 'MMR Vaccination Coverage (%)', and 'Classification', using Arial font size 12 and black color, with a background color of '#D0D0D0' and left alignment.
-    header=dict(
-        values=['<b>State</b>', '<b>Abbr.</b>', '<b>Total Measles Cases</b>', '<b>Population</b>', '<b>Measles Case Rate (per 100K)</b>', '<b>MMR Vaccination Coverage (%)</b>', '<b>Classification</b>'],
-        font=dict(size=12, family="Arial", color="black"),
-        fill_color='#D0D0D0',
-        align='left'
-    ),
-    # 12. Define the table cells using the data from the processed DataFrame, with Arial font size 12 and black color, alternating background colors between '#FAFAFA' and '#FFFFFF', and left alignment.
-    cells=dict(
-        values=[
-            df_usmap['geography'],
-            df_usmap['state_code'],
-             df_usmap[cases_col].apply(lambda x: f'{x:,}' if pd.notna(x) else ''), # Moved to 3rd position
-            df_usmap['population'].apply(lambda x: f'{x:,.0f}' if pd.notna(x) else ''), # Moved to 4th position
-            df_usmap['case_rate'], # Moved to 5th position
-            df_usmap['Estimate (%)'].round(1), # Moved to 6th position
-            df_usmap['category_label'] # Moved to 7th position
-        ],
-        font=dict(size=12, family="Arial", color="black"),
-        fill_color=[['#FAFAFA', '#FFFFFF'] * len(df_usmap)],
-        align='left'
+    # 9. Apply the `classify_detailed_bivariate` function to the DataFrame to create new columns: `case_class`, `mmr_class`, and `category_label`.
+    classification_results = df_usmap.apply(
+        lambda row: classify_detailed_bivariate(row['case_rate'], row['Estimate (%)']), axis=1
     )
-)])
 
-# 13. Update the figure layout to set the default font to Arial size 12.
-fig.update_layout(
-    font=dict(family="Arial", size=12),
-     # Add autosize layout parameter for potentially better column width fitting
-    autosize=True,
-    margin=dict(l=20, r=20, t=20, b=100) # Add some margin
-)
+    df_usmap['case_class'] = [result[0] for result in classification_results]
+    df_usmap['mmr_class'] = [result[1] for result in classification_results]
+    df_usmap['category_label'] = [result[2] for result in classification_results]
 
-# Add Last refreshed note
-fig.add_annotation(
-    text=f"<b>Last refreshed:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}",
-    xref="paper", yref="paper",
-    x=0.0, y=-0.2,  # Adjust y position as needed
-    showarrow=False,
-    font=dict(size=10, color='gray'),
-    xanchor="left", yanchor="top",
-    align="left"
-    
+    # 10. Create a Plotly table using `go.Figure` and `go.Table`.
+    fig = go.Figure(data=[go.Table(
+        # 11. Define the table header with bold text for 'State', 'Abbr.', 'Total Measles Cases', 'Population', 'Measles Case Rate (per 100K)', 'MMR Vaccination Coverage (%)', and 'Classification', using Arial font size 12 and black color, with a background color of '#D0D0D0' and left alignment.
+        header=dict(
+            values=['<b>State</b>', '<b>Abbr.</b>', '<b>Total Measles Cases</b>', '<b>Population</b>', '<b>Measles Case Rate (per 100K)</b>', '<b>MMR Vaccination Coverage (%)</b>', '<b>Classification</b>'],
+            font=dict(size=12, family="Arial", color="black"),
+            fill_color='#D0D0D0',
+            align='left'
+        ),
+        # 12. Define the table cells using the data from the processed DataFrame, with Arial font size 12 and black color, alternating background colors between '#FAFAFA' and '#FFFFFF', and left alignment.
+        cells=dict(
+            values=[
+                df_usmap['geography'],
+                df_usmap['state_code'],
+                 df_usmap[cases_col].apply(lambda x: f'{x:,}' if pd.notna(x) else ''), # Moved to 3rd position
+                df_usmap['population'].apply(lambda x: f'{x:,.0f}' if pd.notna(x) else ''), # Moved to 4th position
+                df_usmap['case_rate'], # Moved to 5th position
+                df_usmap['Estimate (%)'].round(1), # Moved to 6th position
+                df_usmap['category_label'] # Moved to 7th position
+            ],
+            font=dict(size=12, family="Arial", color="black"),
+            fill_color=[['#FAFAFA', '#FFFFFF'] * len(df_usmap)],
+            align='left'
+        )
+    )])
+
+    # 13. Update the figure layout to set the default font to Arial size 12.
+    fig.update_layout(
+        font=dict(family="Arial", size=12),
+         # Add autosize layout parameter for potentially better column width fitting
+        autosize=True,
+        margin=dict(l=20, r=20, t=20, b=100) # Add some margin
+    )
+
+    # Add Last refreshed note
+    fig.add_annotation(
+        text=f"<b>Last refreshed:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}",
+        xref="paper", yref="paper",
+        x=0.0, y=-0.2,  # Adjust y position as needed
+        showarrow=False,
+        font=dict(size=10, color='gray'),
+        xanchor="left", yanchor="top",
+        align="left"
+    )
+
+    # 14. Display the generated Plotly table.
     return fig
 
 def create_lives_saved_table(vaccine_impact_data):
