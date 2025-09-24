@@ -1,11 +1,16 @@
-
+"""
+Table Generation Module - Exact Copies from Original Colab
+Contains all table functions exactly as they were in the original notebook
+"""
 
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
 
 def create_timeline_table(timeline_data):
-
+    """
+    Create timeline table exactly as in original Colab
+    """
     # Use the original timeline_data without dropping rows with NaN in 'Highlight'
     timeline_df = timeline_data[['Year', 'Cases', 'Highlight']].copy()
 
@@ -48,6 +53,9 @@ def create_timeline_table(timeline_data):
     return fig
 
 def create_recent_trends_table(usmeasles_data, mmr_data):
+    """
+    Create recent trends table exactly as in original Colab
+    """
     # 1. Create a copy of the usmeasles DataFrame and select the 'year' and 'cases' columns.
     us_data = usmeasles_data[['year', 'cases']].copy()
 
@@ -121,7 +129,9 @@ def create_recent_trends_table(usmeasles_data, mmr_data):
     return fig
 
 def create_rnaught_table():
-
+    """
+    Create R0 table exactly as in original Colab
+    """
     # 1. Define a dictionary containing the disease names and their corresponding R₀ values.
     diseases_data = {
         'Disease': ['Ebola', 'HIV', 'COVID-19 (Omicron)', 'Chickenpox', 'Mumps', 'Measles'],
@@ -176,7 +186,9 @@ def create_rnaught_table():
     return fig
 
 def create_state_map_table(usmap_data):
-
+    """
+    Create state map table exactly as in original Colab
+    """
     # State population lookup
     state_populations = {
         'Alabama': 5108468, 'Alaska': 733406, 'Arizona': 7431344, 'Arkansas': 3067732,
@@ -312,7 +324,9 @@ def create_state_map_table(usmap_data):
     return fig
 
 def create_lives_saved_table(vaccine_impact_data):
-
+    """
+    Create lives saved table exactly as in original Colab
+    """
     # 1. Create a copy of the `vaccine_impact` DataFrame.
     df_vaccine_impact = vaccine_impact_data.copy()
 
