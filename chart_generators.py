@@ -1386,10 +1386,8 @@ def create_lives_saved_chart(vaccine_impact_data):
         align="left"
     )
 
-    return fig"""
-Chart Generation Module - Exact Copies from Original Colab
-Contains all visualization functions exactly as they were in the original notebook
-"""
+    return fig
+
 
 import plotly.graph_objects as go
 import pandas as pd
