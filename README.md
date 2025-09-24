@@ -1,43 +1,61 @@
 # Measles Data Visualizations
 
+Automated measles surveillance visualizations for iframe embedding.
 
-This repository automatically generates interactive charts and tables showing:
+## What This Is
 
-- Historical measles cases in the US
-- Recent trends in cases and vaccination rates
-- State-by-state analysis with vaccination coverage
-- Lives saved through vaccination programs
-- Disease contagiousness comparisons
+This repository generates individual HTML pages for each chart and table, designed to be embedded as iframes in other websites.
 
-## How It Works
+## Individual Pages Generated
 
-- **Daily Updates**: GitHub Actions runs every day at 6 AM UTC
-- **Data Sources**: CDC measles data, WHO vaccination impact data, state health departments
-- **Backup System**: If data sources are down, uses cached backups
-- **GitHub Pages**: Automatically deploys updated visualizations
+**Charts:**
+- `timeline.html` - Historical measles timeline
+- `recent_trends.html` - Recent cases and vaccination trends  
+- `rnaught_comparison.html` - Disease contagiousness comparison
+- `state_map.html` - State-by-state map
+- `lives_saved.html` - Lives saved by vaccination
+
+**Tables:**
+- `timeline_table.html` - Historical data table
+- `recent_trends_table.html` - Recent trends data table
+- `rnaught_table.html` - Disease R0 values table
+- `state_map_table.html` - State data table
+- `lives_saved_table.html` - Lives saved data table
+
+## Live Links
+
+
+- https://ASU-KE.github.io/ASUHOMeasles/timeline.html
+- https://ASU-KE.github.io/ASUHOMeasles/recent_trends.html  
+- https://ASU-KE.github.io/ASUHOMeasles/rnaught_comparison.html
+- https://ASU-KE.github.io/ASUHOMeasles/state_map.html
+- https://ASU-KE.github.io/ASUHOMeasles/lives_saved.html
+- https://ASU-KE.github.io/ASUHOMeasles/timeline_table.html
+- https://ASU-KE.github.io/ASUHOMeasles/recent_trends_table.html
+- https://ASU-KE.github.io/ASUHOMeasles/rnaught_table.html
+- https://ASU-KE.github.io/ASUHOMeasles/state_map_table.html
+- https://ASU-KE.github.io/ASUHOMeasles/lives_saved_table.html
+
+## Automatic Updates
+
+- Runs daily at 6 AM UTC
+- Fetches fresh data from CDC and WHO
+- Falls back to cached data if sources are down
+- All pages update automatically
+
+## Setup
+
+1. Enable GitHub Pages: Settings → Pages → Source: "GitHub Actions"
+2. Add data files to `data/` directory
+3. Workflow runs automatically
 
 ## Data Sources
 
-**Live Data (Updated Daily):**
-- CDC Measles Cases by Year
-- CDC Measles Cases by State  
-- WHO Vaccine Impact Database
+- CDC Measles Cases (live data)
+- WHO Vaccine Impact Database (live data)  
+- State vaccination coverage files (repository data)
 
-**Static Data (Repository Files):**
-- `data/timeline.csv` - Historical timeline with key events
-- `data/MMRKCoverage.csv` - MMR vaccination coverage data
-- `data/MMRKCoverage25.csv` - 2025 state vaccination rates
+---
 
-## Edits 
-
-- Update colors in `chart_styles.py`
-- Modify thresholds in classification functions
-- Add timeline events in `timeline.csv`
-- Change data sources in `data_manager.py`
-
-## Monitoring
-
-- Check the Actions tab for workflow status
-- View logs in `measles_viz.log`
-- Backup files stored in `data/backups/`
+*Each visualization updates automatically with the latest public health data.*
 
