@@ -10,9 +10,9 @@ from pathlib import Path
 from datetime import datetime
 
 # Import our modules
-from data_manager_clean import DataManager
-from original_chart_generators import *
-from original_table_generators import *
+from data_manager import *
+from chart_generators import *
+from table_generators import *
 
 # Configure logging
 logging.basicConfig(
