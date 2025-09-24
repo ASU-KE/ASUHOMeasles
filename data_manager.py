@@ -42,7 +42,6 @@ class DataManager:
         # Static data file paths (stored in repo)
         self.static_files = {
             'timeline': 'data/timeline.csv',
-            'az_cases': 'data/AZCases.csv',
             'mmr': 'data/MMRKCoverage.csv',
             'mmr_map': 'data/MMRKCoverage25.csv'
         }
@@ -221,11 +220,6 @@ class DataManager:
         
         # US Measles data - already clean
         processed['usmeasles'] = raw_data['usmeasles']
-        
-        # Arizona cases data
-        az_cases = raw_data['az_cases'][['Year', 'Cases']].copy()
-        az_cases['Location'] = 'Arizona'
-        processed['az_cases'] = az_cases
         
         # MMR Coverage data
         processed['mmr'] = raw_data['mmr']
