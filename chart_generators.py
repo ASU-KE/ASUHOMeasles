@@ -356,6 +356,8 @@ def create_recent_trends(usmeasles_data, mmr_data):
     us_data = usmeasles_data.copy()
     us_data['Location'] = 'United States'
     us_data = us_data.drop_duplicates(subset=['year'])
+    us_data['year'] = pd.to_numeric(us_data['year'], errors='coerce').astype('Int64')
+    mmr_clean['year'] = pd.to_numeric(mmr_clean['year'], errors='coerce').astype('Int64')
 
     # Merge with vaccination data if available
     if not mmr_data.empty:
@@ -854,10 +856,22 @@ def create_bivariate_choropleth(usmap_data):
         return go.Figure()
 
     # Prepare data
+   # Prepare data
     df = df.copy()
     df['population'] = df['geography'].map(state_populations)
+    
+    # Ensure population is numeric
+    df['population'] = pd.to_numeric(df['population'], errors='coerce')
+    
     df['state_code'] = df['geography'].map(state_abbrev)
+    
+    # Ensure cases column is numeric
+    df[cases_col] = pd.to_numeric(df[cases_col], errors='coerce')
+    
+    # Compute case rate safely
     df['case_rate'] = (df[cases_col] / df['population'] * 100000).round(2).fillna(0)
+    
+    # Ensure vaccination col is numeric
     df[vaccination_col] = pd.to_numeric(df[vaccination_col], errors='coerce')
 
     # Identify states with missing MMR data
