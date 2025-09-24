@@ -24,104 +24,44 @@ logging.basicConfig(
     ]
 )
 
-def create_html_page(fig, title, filename, description=""):
+def create_html_page(fig, filename):
     """
-    Create a standalone HTML page with the visualization
+    Create a simple HTML page with just the visualization for iframe embedding
     
     Args:
         fig: Plotly figure object
-        title (str): Page title
         filename (str): Output filename
-        description (str): Page description
     """
-    html_template = f"""
+    # Generate the HTML with minimal styling for iframe embedding
+    html_content = fig.to_html(
+        include_plotlyjs='cdn',
+        div_id='chart',
+        config={'displayModeBar': False, 'responsive': True}
+    )
+    
+    # Add minimal CSS for iframe compatibility
+    full_html = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - Measles Data Visualization</title>
-    <meta name="description" content="{description}">
+    <title>Measles Data Visualization</title>
     <style>
         body {{
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }}
-        .container {{
-            max-width: 1200px;
-            margin: 0 auto;
+            padding: 0;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
         }}
-        h1 {{
-            color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-        }}
-        .description {{
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-        }}
-        .nav {{
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }}
-        .nav a {{
-            margin: 0 15px;
-            text-decoration: none;
-            color: #007bff;
-            font-weight: 500;
-        }}
-        .nav a:hover {{
-            text-decoration: underline;
-        }}
-        .chart-container {{
+        #chart {{
             width: 100%;
-            height: auto;
-        }}
-        .footer {{
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            color: #666;
-            font-size: 14px;
+            height: 100vh;
         }}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>{title}</h1>
-        <div class="description">{description}</div>
-        
-        <div class="nav">
-            <a href="index.html">Home</a> |
-            <a href="timeline.html">Historical Timeline</a> |
-            <a href="recent_trends.html">Recent Trends</a> |
-            <a href="rnaught_comparison.html">Disease Comparison</a> |
-            <a href="state_map.html">State Map</a> |
-            <a href="lives_saved.html">Lives Saved</a>
-        </div>
-        
-        <div class="chart-container">
-            {fig.to_html(include_plotlyjs='cdn', div_id='chart')}
-        </div>
-        
-        <div class="footer">
-            <p><strong>Data Sources:</strong> CDC, WHO, State Health Departments</p>
-            <p>Generated on {datetime.now().strftime("%B %d, %Y at %I:%M %p")}</p>
-            <p><a href="https://github.com/yourusername/measles-viz" target="_blank">View Source Code</a></p>
-        </div>
-    </div>
+    {html_content}
 </body>
 </html>
 """
@@ -130,205 +70,113 @@ def create_html_page(fig, title, filename, description=""):
     output_dir.mkdir(exist_ok=True)
     
     with open(output_dir / filename, 'w', encoding='utf-8') as f:
-        f.write(html_template)
+        f.write(full_html)
     
     logging.info(f"Created {filename}")
 
 def create_index_page():
-    """Create the main index page"""
-    html_content = """
+    """Create a simple index page with links to all visualizations"""
+    html_content = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measles Data Visualization Dashboard</title>
-    <meta name="description" content="Interactive visualizations of measles case data, vaccination coverage, and public health trends">
+    <title>Measles Data Visualizations</title>
     <style>
-        body {
+        body {{
             font-family: Arial, sans-serif;
-            margin: 0;
+            max-width: 800px;
+            margin: 50px auto;
             padding: 20px;
-            background-color: #f5f5f5;
             line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
+        }}
+        h1 {{
             color: #333;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 1.2em;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin: 40px 0;
-        }
-        .card {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 25px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .card h3 {
-            margin-top: 0;
-            color: #007bff;
-            font-size: 1.3em;
-        }
-        .card p {
-            color: #666;
+        }}
+        .link-list {{
+            list-style: none;
+            padding: 0;
+        }}
+        .link-list li {{
             margin: 15px 0;
-        }
-        .card-links {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .btn {
-            padding: 8px 16px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }}
+        .link-list a {{
+            color: #007bff;
             text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #545b62;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            color: #666;
-        }
-        .key-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-            text-align: center;
-        }
-        .stat-box {
-            background-color: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2196f3;
-        }
-        .stat-number {
-            font-size: 2em;
             font-weight: bold;
-            color: #1976d2;
-        }
-        .stat-label {
+            font-size: 16px;
+        }}
+        .link-list a:hover {{
+            text-decoration: underline;
+        }}
+        .description {{
             color: #666;
             margin-top: 5px;
-        }
+            font-size: 14px;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+        }}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Measles Data Visualization</h1>
-        <div class="subtitle">Interactive visualizations of measles case data, vaccination coverage, and public health trends</div>
-        
-        <div class="key-stats">
-            <div class="stat-box">
-                <div class="stat-number">18</div>
-                <div class="stat-label">R₀ Value for Measles<br>(Most Contagious)</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">95%</div>
-                <div class="stat-label">Vaccination Rate Needed<br>for Herd Immunity</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number">1963</div>
-                <div class="stat-label">Year MMR Vaccine<br>Was Licensed</div>
-            </div>
-        </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h3>Historical Timeline</h3>
-                <p>Explore measles case trends from 1944 to present, with key vaccine milestones and public health events highlighted.</p>
-                <div class="card-links">
-                    <a href="timeline.html" class="btn btn-primary">View Chart</a>
-                    <a href="timeline_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Recent Trends</h3>
-                <p>Recent measles cases and vaccination coverage rates, showing the relationship between immunization and disease prevention.</p>
-                <div class="card-links">
-                    <a href="recent_trends.html" class="btn btn-primary">View Chart</a>
-                    <a href="recent_trends_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Disease Comparison</h3>
-                <p>Compare the contagiousness of measles with other diseases using basic reproduction number (R₀) values.</p>
-                <div class="card-links">
-                    <a href="rnaught_comparison.html" class="btn btn-primary">View Chart</a>
-                    <a href="rnaught_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>State-by-State Analysis</h3>
-                <p>Interactive map showing measles case rates and vaccination coverage by state, with bivariate color coding.</p>
-                <div class="card-links">
-                    <a href="state_map.html" class="btn btn-primary">View Map</a>
-                    <a href="state_map_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Lives Saved by Vaccination</h3>
-                <p>Estimated lives saved through measles vaccination programs, based on WHO modeling data.</p>
-                <div class="card-links">
-                    <a href="lives_saved.html" class="btn btn-primary">View Chart</a>
-                    <a href="lives_saved_table.html" class="btn btn-secondary">View Data</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p><strong>About This Dashboard:</strong> This visualization dashboard presents measles surveillance data from the CDC, WHO, and state health departments. All visualizations are automatically updated daily with the latest available data.</p>
-            <p><strong>Data Sources:</strong> CDC Wonder, WHO Vaccine Impact Database, State Health Department Reports</p>
-            <p>Last updated: """ + datetime.now().strftime("%B %d, %Y at %I:%M %p") + """</p>
-            <p><a href="https://github.com/yourusername/measles-viz" target="_blank">View Source Code on GitHub</a></p>
-        </div>
+    <h1>Measles Data Visualizations</h1>
+    <p>Individual visualizations for iframe embedding:</p>
+    
+    <ul class="link-list">
+        <li>
+            <a href="timeline.html" target="_blank">Historical Timeline</a>
+            <div class="description">Historical measles cases with vaccine milestones</div>
+        </li>
+        <li>
+            <a href="recent_trends.html" target="_blank">Recent Trends</a>
+            <div class="description">Recent cases and vaccination coverage</div>
+        </li>
+        <li>
+            <a href="rnaught_comparison.html" target="_blank">Disease Comparison</a>
+            <div class="description">Contagiousness comparison across diseases</div>
+        </li>
+        <li>
+            <a href="state_map.html" target="_blank">State Map</a>
+            <div class="description">State-by-state cases and vaccination coverage</div>
+        </li>
+        <li>
+            <a href="lives_saved.html" target="_blank">Lives Saved</a>
+            <div class="description">Estimated lives saved by vaccination</div>
+        </li>
+        <li>
+            <a href="timeline_table.html" target="_blank">Timeline Data Table</a>
+            <div class="description">Historical data in table format</div>
+        </li>
+        <li>
+            <a href="recent_trends_table.html" target="_blank">Recent Trends Table</a>
+            <div class="description">Recent data in table format</div>
+        </li>
+        <li>
+            <a href="rnaught_table.html" target="_blank">Disease R0 Table</a>
+            <div class="description">Disease reproduction numbers</div>
+        </li>
+        <li>
+            <a href="state_map_table.html" target="_blank">State Data Table</a>
+            <div class="description">State-by-state data in table format</div>
+        </li>
+        <li>
+            <a href="lives_saved_table.html" target="_blank">Lives Saved Table</a>
+            <div class="description">Lives saved data in table format</div>
+        </li>
+    </ul>
+    
+    <div class="footer">
+        <p>Last updated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}</p>
+        <p>Data automatically refreshes daily</p>
     </div>
 </body>
 </html>
@@ -389,60 +237,35 @@ def main():
         # Timeline chart
         try:
             timeline_fig = create_measles_timeline(data['timeline'])
-            create_html_page(
-                timeline_fig,
-                "Historical Measles Timeline",
-                "timeline.html",
-                "Historical timeline of measles cases with vaccine milestones"
-            )
+            create_html_page(timeline_fig, "timeline.html")
         except Exception as e:
             logging.error(f"Failed to create timeline chart: {e}")
         
         # Recent trends chart
         try:
             recent_fig = create_recent_trends(data['usmeasles'], data.get('mmr', pd.DataFrame()))
-            create_html_page(
-                recent_fig,
-                "Recent Measles Trends",
-                "recent_trends.html",
-                "Recent measles cases and vaccination coverage trends"
-            )
+            create_html_page(recent_fig, "recent_trends.html")
         except Exception as e:
             logging.error(f"Failed to create recent trends chart: {e}")
         
         # R0 comparison chart
         try:
             rnaught_fig = create_rnaught_comparison()
-            create_html_page(
-                rnaught_fig,
-                "Disease Contagiousness Comparison",
-                "rnaught_comparison.html",
-                "Comparison of basic reproduction numbers across diseases"
-            )
+            create_html_page(rnaught_fig, "rnaught_comparison.html")
         except Exception as e:
             logging.error(f"Failed to create R0 comparison chart: {e}")
         
         # State map
         try:
             map_fig = create_bivariate_choropleth(data['usmap'])
-            create_html_page(
-                map_fig,
-                "State-by-State Measles Analysis",
-                "state_map.html",
-                "Interactive map showing measles cases and vaccination coverage by state"
-            )
+            create_html_page(map_fig, "state_map.html")
         except Exception as e:
             logging.error(f"Failed to create state map: {e}")
         
         # Lives saved chart
         try:
             lives_fig = create_lives_saved_chart(data.get('vaccine_impact', pd.DataFrame()))
-            create_html_page(
-                lives_fig,
-                "Lives Saved by Vaccination",
-                "lives_saved.html",
-                "Estimated lives saved through measles vaccination programs"
-            )
+            create_html_page(lives_fig, "lives_saved.html")
         except Exception as e:
             logging.error(f"Failed to create lives saved chart: {e}")
         
@@ -452,60 +275,35 @@ def main():
         # Timeline table
         try:
             timeline_table = create_timeline_table(data['timeline'])
-            create_html_page(
-                timeline_table,
-                "Historical Timeline Data",
-                "timeline_table.html",
-                "Historical measles case data in table format"
-            )
+            create_html_page(timeline_table, "timeline_table.html")
         except Exception as e:
             logging.error(f"Failed to create timeline table: {e}")
         
         # Recent trends table
         try:
             recent_table = create_recent_trends_table(data['usmeasles'], data.get('mmr', pd.DataFrame()))
-            create_html_page(
-                recent_table,
-                "Recent Trends Data",
-                "recent_trends_table.html",
-                "Recent measles and vaccination data in table format"
-            )
+            create_html_page(recent_table, "recent_trends_table.html")
         except Exception as e:
             logging.error(f"Failed to create recent trends table: {e}")
         
         # R0 table
         try:
             rnaught_table = create_rnaught_table()
-            create_html_page(
-                rnaught_table,
-                "Disease R0 Values",
-                "rnaught_table.html",
-                "Basic reproduction numbers for various diseases"
-            )
+            create_html_page(rnaught_table, "rnaught_table.html")
         except Exception as e:
             logging.error(f"Failed to create R0 table: {e}")
         
         # State map table
         try:
             map_table = create_state_map_table(data['usmap'])
-            create_html_page(
-                map_table,
-                "State Analysis Data",
-                "state_map_table.html",
-                "State-by-state measles and vaccination data"
-            )
+            create_html_page(map_table, "state_map_table.html")
         except Exception as e:
             logging.error(f"Failed to create state map table: {e}")
         
         # Lives saved table
         try:
             lives_table = create_lives_saved_table(data.get('vaccine_impact', pd.DataFrame()))
-            create_html_page(
-                lives_table,
-                "Lives Saved Data",
-                "lives_saved_table.html",
-                "Estimated lives saved by vaccination in table format"
-            )
+            create_html_page(lives_table, "lives_saved_table.html")
         except Exception as e:
             logging.error(f"Failed to create lives saved table: {e}")
         
