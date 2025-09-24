@@ -39,7 +39,7 @@ class DataManager:
             'vaccine_without': 'https://raw.githubusercontent.com/WorldHealthOrganization/epi50-vaccine-impact/refs/tags/v1.0/extern/raw/epi50_measles_no_vaccine.csv'
         }
         
-        # Static data file paths (stored in repo)
+        # Static data file paths
         self.static_files = {
             'timeline': 'data/timeline.csv',
             'mmr': 'data/MMRKCoverage.csv',
