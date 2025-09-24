@@ -356,8 +356,12 @@ def create_recent_trends(usmeasles_data, mmr_data):
     us_data = usmeasles_data.copy()
     us_data['Location'] = 'United States'
     us_data = us_data.drop_duplicates(subset=['year'])
-    us_data['year'] = pd.to_numeric(us_data['year'], errors='coerce').astype('Int64')
-    mmr_clean['year'] = pd.to_numeric(mmr_clean['year'], errors='coerce').astype('Int64')
+    us_data['year'] = pd.to_numeric(us_data['year'], errors='coerce').astype(int)
+
+    if not mmr_data.empty:
+        mmr_clean = mmr_data.copy().drop_duplicates(subset=['year', 'Location'])
+        mmr_clean['year'] = pd.to_numeric(mmr_clean['year'], errors='coerce').astype(int)
+        us_data = pd.merge(us_data, mmr_clean, on=['year', 'Location'], how='left')
 
     # Merge with vaccination data if available
     if not mmr_data.empty:
@@ -561,7 +565,7 @@ def create_recent_trends(usmeasles_data, mmr_data):
         align="left"
     )
 
-    return fig
+    return fig, merged_recent_trends
 
 def create_rnaught_comparison():
     """
