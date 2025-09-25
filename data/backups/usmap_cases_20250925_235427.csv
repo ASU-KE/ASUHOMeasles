@@ -1,0 +1,105 @@
+geography,cases_range,cases_calendar_year,year
+Alabama,0,0,2024
+Alabama,1-9,1,2025
+Alaska,0,0,2024
+Alaska,1-9,3,2025
+Arizona,1-9,5,2024
+Arizona,10-49,49,2025
+Arkansas,0,0,2024
+Arkansas,1-9,8,2025
+California,10-49,13,2024
+California,10-49,20,2025
+Colorado,0,0,2024
+Colorado,10-49,27,2025
+Connecticut,0,0,2024
+Connecticut,0,0,2025
+Delaware,0,0,2024
+Delaware,0,0,2025
+District of Columbia,1-9,1,2024
+District of Columbia,0,0,2025
+Florida,10-49,11,2024
+Florida,1-9,6,2025
+Georgia,1-9,5,2024
+Georgia,10-49,10,2025
+Hawaii,0,0,2024
+Hawaii,1-9,2,2025
+Idaho,0,0,2024
+Idaho,1-9,3,2025
+Illinois,50-99,67,2024
+Illinois,10-49,11,2025
+Indiana,1-9,1,2024
+Indiana,1-9,8,2025
+Iowa,0,0,2024
+Iowa,1-9,8,2025
+Kansas,0,0,2024
+Kansas,50-99,90,2025
+Kentucky,0,0,2024
+Kentucky,10-49,13,2025
+Louisiana,1-9,2,2024
+Louisiana,1-9,2,2025
+Maine,0,0,2024
+Maine,0,0,2025
+Maryland,1-9,1,2024
+Maryland,1-9,3,2025
+Massachusetts,1-9,1,2024
+Massachusetts,0,0,2025
+Michigan,1-9,7,2024
+Michigan,10-49,27,2025
+Minnesota,50-99,65,2024
+Minnesota,1-9,5,2025
+Mississippi,0,0,2024
+Mississippi,0,0,2025
+Missouri,1-9,2,2024
+Missouri,1-9,6,2025
+Montana,0,0,2024
+Montana,10-49,32,2025
+Nebraska,0,0,2024
+Nebraska,1-9,1,2025
+Nevada,0,0,2024
+Nevada,0,0,2025
+New Hampshire,1-9,2,2024
+New Hampshire,0,0,2025
+New Jersey,1-9,7,2024
+New Jersey,10-49,10,2025
+New Mexico,1-9,2,2024
+New Mexico,100-250,100,2025
+New York,1-9,1,2024
+New York,1-9,7,2025
+New York City,10-49,13,2024
+New York City,10-49,12,2025
+North Carolina,1-9,1,2024
+North Carolina,0,0,2025
+North Dakota,0,0,2024
+North Dakota,10-49,36,2025
+Ohio,1-9,7,2024
+Ohio,10-49,33,2025
+Oklahoma,1-9,1,2024
+Oklahoma,10-49,17,2025
+Oregon,10-49,31,2024
+Oregon,1-9,1,2025
+Pennsylvania,1-9,6,2024
+Pennsylvania,10-49,16,2025
+Rhode Island,0,0,2024
+Rhode Island,1-9,1,2025
+South Carolina,1-9,1,2024
+South Carolina,1-9,3,2025
+South Dakota,1-9,1,2024
+South Dakota,10-49,12,2025
+Tennessee,1-9,4,2024
+Tennessee,1-9,7,2025
+Texas,1-9,1,2024
+Texas,800+,803,2025
+Utah,0,0,2024
+Utah,10-49,39,2025
+Vermont,1-9,1,2024
+Vermont,1-9,2,2025
+Virginia,1-9,1,2024
+Virginia,1-9,4,2025
+Washington,1-9,6,2024
+Washington,10-49,10,2025
+West Virginia,1-9,1,2024
+West Virginia,0,0,2025
+Wisconsin,1-9,1,2024
+Wisconsin,10-49,36,2025
+Wyoming,0,0,2024
+Wyoming,1-9,9,2025
