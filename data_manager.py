@@ -431,3 +431,4 @@ class DataManager:
                 validation_results[dataset_name] = {'valid': True, 'rows': len(df)}
                 
         return validation_results
+
