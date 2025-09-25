@@ -11,9 +11,26 @@ from datetime import datetime
 import pandas as pd
 
 # Import our modules
-from data_manager import DataManager
-from chart_generators import *
-from table_generators import *
+try:
+    from data_manager import DataManager
+    logging.info("✓ DataManager imported successfully")
+except ImportError as e:
+    logging.error(f"✗ Failed to import DataManager: {e}")
+    sys.exit(1)
+
+try:
+    from chart_generators import *
+    logging.info("✓ Chart generators imported successfully")
+except ImportError as e:
+    logging.error(f"✗ Failed to import chart_generators: {e}")
+    sys.exit(1)
+
+try:
+    from table_generators import *
+    logging.info("✓ Table generators imported successfully")
+except ImportError as e:
+    logging.error(f"✗ Failed to import table_generators: {e}")
+    sys.exit(1)
 
 # Configure logging
 logging.basicConfig(
@@ -87,6 +104,16 @@ def generate_all_visualizations(data_manager):
     """
     logging.info("Starting visualization generation...")
     
+    # Debug: List available functions
+    import chart_generators
+    import table_generators
+    
+    chart_functions = [name for name in dir(chart_generators) if callable(getattr(chart_generators, name)) and not name.startswith('_')]
+    table_functions = [name for name in dir(table_generators) if callable(getattr(table_generators, name)) and not name.startswith('_')]
+    
+    logging.info(f"Available chart functions: {chart_functions}")
+    logging.info(f"Available table functions: {table_functions}")
+    
     # Fetch all data
     all_data = data_manager.fetch_all_data()
     
@@ -153,27 +180,43 @@ def generate_all_visualizations(data_manager):
         
         # Generate Tables
         logging.info("Creating ASU Unity measles table...")
-        asu_table_fig = create_asu_unity_measles_table(all_data['timeline'])
-        create_html_page(asu_table_fig, 'measles_table.html')
+        try:
+            asu_table_fig = create_asu_unity_measles_table(all_data['timeline'])
+            create_html_page(asu_table_fig, 'measles_table.html')
+        except NameError as e:
+            logging.error(f"Function not found: {e}")
+            logging.error("Please check that table_generators.py is complete and properly imported")
         
         logging.info("Creating complete ASU Unity measles table...")
-        complete_table_fig = create_complete_asu_unity_measles_table(all_data['timeline'])
-        create_html_page(complete_table_fig, 'measles_table_complete.html')
+        try:
+            complete_table_fig = create_complete_asu_unity_measles_table(all_data['timeline'])
+            create_html_page(complete_table_fig, 'measles_table_complete.html')
+        except NameError as e:
+            logging.error(f"Function not found: {e}")
         
         # Generate additional table versions
         logging.info("Creating recent trends table...")
-        recent_table_fig = create_recent_trends_table(recent_data)
-        create_html_page(recent_table_fig, 'recent_trends_table.html')
+        try:
+            recent_table_fig = create_recent_trends_table(recent_data)
+            create_html_page(recent_table_fig, 'recent_trends_table.html')
+        except NameError as e:
+            logging.error(f"Function not found: {e}")
         
         logging.info("Creating R-naught comparison table...")
-        rnaught_table_fig = create_rnaught_comparison_table(disease_data)
-        create_html_page(rnaught_table_fig, 'rnaught_table.html')
+        try:
+            rnaught_table_fig = create_rnaught_comparison_table(disease_data)
+            create_html_page(rnaught_table_fig, 'rnaught_table.html')
+        except NameError as e:
+            logging.error(f"Function not found: {e}")
         
         logging.info("Creating lives saved table...")
-        lives_saved_table_fig = create_lives_saved_table(all_data['vaccine_impact'])
-        create_html_page(lives_saved_table_fig, 'lives_saved_table.html')
+        try:
+            lives_saved_table_fig = create_lives_saved_table(all_data['vaccine_impact'])
+            create_html_page(lives_saved_table_fig, 'lives_saved_table.html')
+        except NameError as e:
+            logging.error(f"Function not found: {e}")
         
-        logging.info("All visualizations generated successfully!")
+        logging.info("Chart visualizations generated successfully!")
         return True
         
     except Exception as e:
