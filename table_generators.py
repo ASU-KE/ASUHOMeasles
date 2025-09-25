@@ -282,7 +282,8 @@ def create_state_map_table(usmap_data):
             values=['<b>State</b>', '<b>Abbr.</b>', '<b>Total Measles Cases</b>', '<b>Population</b>', '<b>Measles Case Rate (per 100K)</b>', '<b>MMR Vaccination Coverage (%)</b>', '<b>Classification</b>'],
             font=dict(size=12, family="Arial", color="black"),
             fill_color='#D0D0D0',
-            align='left'
+            align='left',
+            height=40  # Set equal header height
         ),
         # 12. Define the table cells using the data from the processed DataFrame, with Arial font size 12 and black color, alternating background colors between '#FAFAFA' and '#FFFFFF', and left alignment.
         cells=dict(
@@ -297,8 +298,11 @@ def create_state_map_table(usmap_data):
             ],
             font=dict(size=12, family="Arial", color="black"),
             fill_color=[['#FAFAFA', '#FFFFFF'] * len(df_usmap)],
-            align='left'
-        )
+            align='left',
+            height=30  # Set equal row height for all cells
+        ),
+        # Set equal column widths
+        columnwidth=[1, 1, 1, 1, 1, 1, 1]  # Equal width for all 7 columns
     )])
 
     # 13. Update the figure layout to set the default font to Arial size 12.
@@ -322,7 +326,6 @@ def create_state_map_table(usmap_data):
 
     # 14. Display the generated Plotly table.
     return fig
-
 def create_lives_saved_table(vaccine_impact_data):
     """
     Create lives saved table exactly as in original Colab
