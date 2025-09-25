@@ -1043,7 +1043,7 @@ def create_bivariate_choropleth(usmap_data):
         text="← Case Rate →",
         xref="paper", yref="paper",
         x=legend_x - 0.035,
-        y=legend_y - 1.5 * (cell_size + spacing) 
+        y=legend_y - 1.5 * (cell_size + spacing), 
         showarrow=False,
         font=dict(size=14, color='black'),
         xanchor="center", yanchor="middle",
