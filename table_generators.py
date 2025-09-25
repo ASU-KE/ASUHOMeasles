@@ -395,5 +395,16 @@ def create_lives_saved_table(vaccine_impact_data):
             align="left"
         )
 
+    # Add note about data nature - Adjusted position to be below the timestamp
+        fig.add_annotation(
+            text="<i>Note: These are mathematical model estimates, not observed deaths</i>",
+            xref="paper", yref="paper",
+            x=0.0, y=SPACING['footer_y'] - 0.03, # Positioned below timestamp
+            showarrow=False,
+            font=dict(size=FONT_SIZES['footer'] - 1, color='gray', family=FONT_FAMILY), # Slightly smaller font
+            xanchor="left", yanchor="top", # Anchor to top
+            align="left"
+        )
+
         # 8. Display the generated Plotly table.
         return fig
