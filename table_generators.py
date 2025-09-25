@@ -301,8 +301,8 @@ def create_state_map_table(usmap_data):
             align='left',
             height=30  # Set equal row height for all cells
         ),
-        # Set equal column widths
-        columnwidth=[1, 1, 1, 1, 1, 1, 1]  # Equal width for all 7 columns
+        # Set proportional column widths based on content
+        columnwidth=[2, 0.8, 1.5, 1.5, 2, 2, 4]  # Proportional widths: State, Abbr, Cases, Population, Case Rate, Coverage, Classification
     )])
 
     # 13. Update the figure layout to set the default font to Arial size 12.
@@ -326,6 +326,7 @@ def create_state_map_table(usmap_data):
 
     # 14. Display the generated Plotly table.
     return fig
+    
 def create_lives_saved_table(vaccine_impact_data):
     """
     Create lives saved table exactly as in original Colab
