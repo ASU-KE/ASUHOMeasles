@@ -285,8 +285,11 @@ class DataManager:
             # Merge map data
             usmap = usmap_cases.merge(mmr_map, on='geography', how='left')
             
+            # Filter out NYC and DC as they are not states
+            usmap = usmap[~usmap['geography'].isin(['New York City', 'District of Columbia'])].copy()
+            
             # Debug merge results
-            logging.info(f"After merge, usmap has {len(usmap)} rows")
+            logging.info(f"After merge and filtering, usmap has {len(usmap)} rows")
             logging.info(f"Merge columns: {list(usmap.columns)}")
             
             # Handle year filtering - check both possible year columns
