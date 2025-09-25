@@ -1,6 +1,6 @@
 """
 Data Manager for Measles Data Visualization
-Handles data loading, backup, and validation
+Handles data loading, backup, and validation with proper data type handling
 """
 
 import pandas as pd
@@ -39,7 +39,7 @@ class DataManager:
             'vaccine_without': 'https://raw.githubusercontent.com/WorldHealthOrganization/epi50-vaccine-impact/refs/tags/v1.0/extern/raw/epi50_measles_no_vaccine.csv'
         }
         
-        # Static data file paths
+        # Static data file paths (stored in repo)
         self.static_files = {
             'timeline': 'data/timeline.csv',
             'mmr': 'data/MMRKCoverage.csv',
@@ -155,6 +155,24 @@ class DataManager:
             logging.error(f"Failed to load static file {filename}: {e}")
             return None
 
+    def standardize_year_columns(self, df, year_col):
+        """
+        Standardize year columns to ensure consistent data types
+        
+        Args:
+            df (pd.DataFrame): DataFrame to process
+            year_col (str): Name of year column
+            
+        Returns:
+            pd.DataFrame: DataFrame with standardized year column
+        """
+        if year_col in df.columns:
+            # Convert to numeric, handling any string representations
+            df[year_col] = pd.to_numeric(df[year_col], errors='coerce')
+            # Convert to integer where possible
+            df[year_col] = df[year_col].astype('Int64')  # Nullable integer
+        return df
+
     def fetch_all_data(self):
         """
         Fetch all required data sources with fallback to backups
@@ -168,6 +186,9 @@ class DataManager:
         for key, filepath in self.static_files.items():
             static_data = self.load_static_data(filepath)
             if static_data is not None:
+                # Standardize year columns if they exist
+                if key == 'mmr' and 'year' in static_data.columns:
+                    static_data = self.standardize_year_columns(static_data, 'year')
                 data[key] = static_data
                 logging.info(f"Loaded static data: {key}")
             else:
@@ -182,6 +203,10 @@ class DataManager:
                 # Convert to DataFrame - handle both dict and list formats from JSON APIs
                 if isinstance(downloaded_data, (dict, list)):
                     downloaded_data = pd.DataFrame(downloaded_data)
+                
+                # Standardize year columns
+                if 'year' in downloaded_data.columns:
+                    downloaded_data = self.standardize_year_columns(downloaded_data, 'year')
                     
                 data[key] = downloaded_data
                 self.save_backup(downloaded_data, key)
@@ -193,6 +218,11 @@ class DataManager:
                 if backup_data is not None:
                     if isinstance(backup_data, (dict, list)):
                         backup_data = pd.DataFrame(backup_data)
+                    
+                    # Standardize year columns in backup data too
+                    if isinstance(backup_data, pd.DataFrame) and 'year' in backup_data.columns:
+                        backup_data = self.standardize_year_columns(backup_data, 'year')
+                        
                     data[key] = backup_data
                     logging.warning(f"Using backup data for: {key}")
                 else:
@@ -205,7 +235,7 @@ class DataManager:
 
     def process_data(self, raw_data):
         """
-        Process and clean raw data
+        Process and clean raw data with proper data type handling
         
         Args:
             raw_data (dict): Dictionary of raw datasets
@@ -216,38 +246,41 @@ class DataManager:
         processed = {}
         
         try:
-            # Timeline data - already clean
-            processed['timeline'] = raw_data['timeline']
+            # Timeline data - already clean, ensure Year is numeric
+            timeline = raw_data['timeline'].copy()
+            if 'Year' in timeline.columns:
+                timeline['Year'] = pd.to_numeric(timeline['Year'], errors='coerce')
+            processed['timeline'] = timeline
             logging.info("Processed timeline data successfully")
             
-            # US Measles data - already clean
-            processed['usmeasles'] = raw_data['usmeasles']
+            # US Measles data - ensure year is numeric
+            usmeasles = raw_data['usmeasles'].copy()
+            if 'year' in usmeasles.columns:
+                usmeasles = self.standardize_year_columns(usmeasles, 'year')
+            processed['usmeasles'] = usmeasles
             logging.info("Processed US measles data successfully")
             
-            # MMR Coverage data
-            processed['mmr'] = raw_data['mmr']
+            # MMR Coverage data - ensure year is numeric
+            mmr = raw_data['mmr'].copy()
+            if 'year' in mmr.columns:
+                mmr = self.standardize_year_columns(mmr, 'year')
+            processed['mmr'] = mmr
             logging.info("Processed MMR data successfully")
             
-            # Process map data
+            # Process map data with proper data type handling
             logging.info("Processing map data...")
             mmr_map = raw_data['mmr_map'].rename(columns={'Geography': 'geography'})
-            usmap_cases = raw_data['usmap_cases']
+            usmap_cases = raw_data['usmap_cases'].copy()
             
-            # Debug: Check data types
-            logging.info(f"mmr_map type: {type(mmr_map)}, shape: {mmr_map.shape}, columns: {list(mmr_map.columns)}")
-            logging.info(f"usmap_cases type: {type(usmap_cases)}, shape: {usmap_cases.shape}, columns: {list(usmap_cases.columns)}")
+            # Ensure consistent data types for merge
+            if 'year' in mmr_map.columns:
+                mmr_map = self.standardize_year_columns(mmr_map, 'year')
+            if 'year' in usmap_cases.columns:
+                usmap_cases = self.standardize_year_columns(usmap_cases, 'year')
             
-            # Show sample data
-            logging.info(f"Sample mmr_map data:\n{mmr_map.head()}")
-            logging.info(f"Sample usmap_cases data:\n{usmap_cases.head()}")
-            
-            # Ensure both are DataFrames
-            if not isinstance(mmr_map, pd.DataFrame):
-                logging.error(f"mmr_map is not a DataFrame: {type(mmr_map)}")
-                return None
-            if not isinstance(usmap_cases, pd.DataFrame):
-                logging.error(f"usmap_cases is not a DataFrame: {type(usmap_cases)}")
-                return None
+            # Debug: Check data types and sample data before merge
+            logging.info(f"mmr_map columns: {list(mmr_map.columns)}")
+            logging.info(f"usmap_cases columns: {list(usmap_cases.columns)}")
             
             # Merge map data
             usmap = usmap_cases.merge(mmr_map, on='geography', how='left')
@@ -256,49 +289,72 @@ class DataManager:
             logging.info(f"After merge, usmap has {len(usmap)} rows")
             logging.info(f"Merge columns: {list(usmap.columns)}")
             
-            # Check available years after merge
-            if 'year_x' in usmap.columns:
-                available_years = usmap['year_x'].dropna().unique()
+            # Handle year filtering - check both possible year columns
+            year_col = 'year_x' if 'year_x' in usmap.columns else 'year'
+            if year_col in usmap.columns:
+                # Convert year column to numeric
+                usmap[year_col] = pd.to_numeric(usmap[year_col], errors='coerce')
+                available_years = usmap[year_col].dropna().unique()
                 logging.info(f"Available years in merged data: {sorted(available_years)}")
+                
+                # Filter to 2025 data as specified in original code
+                usmap_2025 = usmap[usmap[year_col] == 2025].copy()
+                logging.info(f"After filtering to 2025: {len(usmap_2025)} rows")
+                
+                # If no 2025 data, use most recent year
+                if len(usmap_2025) == 0:
+                    logging.warning("No 2025 data found. Checking for most recent year instead...")
+                    if len(usmap) > 0:
+                        most_recent_year = usmap[year_col].max()
+                        logging.info(f"Most recent year available: {most_recent_year}")
+                        usmap_2025 = usmap[usmap[year_col] == most_recent_year].copy()
+                        logging.info(f"Using {most_recent_year} data: {len(usmap_2025)} rows")
+                
+                usmap = usmap_2025
             
-            # Filter to 2025 as specified in original code
-            usmap_2025 = usmap[usmap['year_x'] == 2025].copy()
-            logging.info(f"After filtering to 2025: {len(usmap_2025)} rows")
+            # Convert Estimate (%) to numeric and handle any string values
+            if 'Estimate (%)' in usmap.columns:
+                usmap['Estimate (%)'] = pd.to_numeric(usmap['Estimate (%)'], errors='coerce')
             
-            # If no 2025 data, let's see what years we do have
-            if len(usmap_2025) == 0:
-                logging.warning("No 2025 data found. Checking for most recent year instead...")
-                if len(usmap) > 0:
-                    most_recent_year = usmap['year_x'].max()
-                    logging.info(f"Most recent year available: {most_recent_year}")
-                    usmap_2025 = usmap[usmap['year_x'] == most_recent_year].copy()
-                    logging.info(f"Using {most_recent_year} data: {len(usmap_2025)} rows")
+            # Ensure cases column is numeric for calculations
+            cases_col = next((c for c in ['cases_calendar_year', 'cases', 'Cases'] if c in usmap.columns), None)
+            if cases_col and cases_col in usmap.columns:
+                usmap[cases_col] = pd.to_numeric(usmap[cases_col], errors='coerce')
             
-            usmap_2025['Estimate (%)'] = pd.to_numeric(usmap_2025['Estimate (%)'], errors='coerce')
-            processed['usmap'] = usmap_2025
+            processed['usmap'] = usmap
             logging.info("Processed map data successfully")
             
             # Process vaccine impact data
             logging.info("Processing vaccine impact data...")
-            vax_df = raw_data['vaccine_with']
-            no_vax_df = raw_data['vaccine_without']
+            vax_df = raw_data['vaccine_with'].copy()
+            no_vax_df = raw_data['vaccine_without'].copy()
+            
+            # Ensure year columns are consistent
+            if 'year' in vax_df.columns:
+                vax_df = self.standardize_year_columns(vax_df, 'year')
+            if 'year' in no_vax_df.columns:
+                no_vax_df = self.standardize_year_columns(no_vax_df, 'year')
             
             # Debug: Check vaccine data types
             logging.info(f"vax_df type: {type(vax_df)}")
             logging.info(f"no_vax_df type: {type(no_vax_df)}")
             
-            # Ensure vaccine data are DataFrames
-            if not isinstance(vax_df, pd.DataFrame):
-                logging.error(f"vax_df is not a DataFrame: {type(vax_df)}")
-                return None
-            if not isinstance(no_vax_df, pd.DataFrame):
-                logging.error(f"no_vax_df is not a DataFrame: {type(no_vax_df)}")
-                return None
-            
+            # Filter for USA data
             vax_usa = vax_df[vax_df['iso'] == 'USA'].copy()
             no_vax_usa = no_vax_df[no_vax_df['iso'] == 'USA'].copy()
             
+            # Merge vaccine data
             merged_vaccine = pd.merge(no_vax_usa, vax_usa, on='year', suffixes=('_no_vaccine', '_vaccine'))
+            
+            # Calculate lives saved - ensure numeric columns
+            numeric_cols = ['mean_deaths_no_vaccine', 'mean_deaths_vaccine', 
+                           'ub_deaths_no_vaccine', 'lb_deaths_vaccine',
+                           'lb_deaths_no_vaccine', 'ub_deaths_vaccine']
+            
+            for col in numeric_cols:
+                if col in merged_vaccine.columns:
+                    merged_vaccine[col] = pd.to_numeric(merged_vaccine[col], errors='coerce')
+            
             merged_vaccine['lives_saved'] = (merged_vaccine['mean_deaths_no_vaccine'] - 
                                            merged_vaccine['mean_deaths_vaccine'])
             merged_vaccine['lives_saved_ub'] = (merged_vaccine['ub_deaths_no_vaccine'] - 
