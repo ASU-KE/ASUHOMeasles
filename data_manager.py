@@ -11,7 +11,7 @@ from datetime import datetime
 import requests
 from pathlib import Path
 import logging
-
+from state_data_scraper import SouthwestStatesScraper, load_southwest_weekly_surveillance_data
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -431,3 +431,157 @@ class DataManager:
                 validation_results[dataset_name] = {'valid': True, 'rows': len(df)}
                 
         return validation_results
+
+def load_weekly_surveillance_data(self):
+    """
+    Load weekly epidemiological surveillance data for Southwest states.
+    Pulls data directly from state health department websites.
+    
+    Returns:
+        pd.DataFrame: Weekly surveillance data with current and previous week cases
+    """
+    try:
+        logging.info("Loading Southwest states weekly measles surveillance data...")
+        
+        # Use the state-specific scraper
+        weekly_data = load_southwest_weekly_surveillance_data()
+        
+        if not weekly_data.empty:
+            logging.info(f"Successfully loaded data from {len(weekly_data)} Southwest states")
+            
+            # Log data sources for attribution
+            for _, row in weekly_data.iterrows():
+                logging.info(f"{row['state_name']}: {row['current_week_cases']} cases "
+                           f"(Source: {row['data_source']})")
+            
+            return weekly_data
+        else:
+            logging.warning("No weekly surveillance data available, using fallback")
+            return self.generate_fallback_weekly_data()
+            
+    except Exception as e:
+        logging.error(f"Error loading weekly surveillance data: {e}")
+        return self.generate_fallback_weekly_data()
+
+def generate_fallback_weekly_data(self):
+    """
+    Generate fallback weekly surveillance data when scraping fails.
+    This ensures the dashboard always has data to display.
+    """
+    southwest_states = {
+        'TX': 'Texas',
+        'NM': 'New Mexico', 
+        'UT': 'Utah',
+        'CA': 'California',
+        'NV': 'Nevada',
+        'AZ': 'Arizona'
+    }
+    
+    fallback_data = []
+    current_epi_week = self.get_current_epi_week()[0]
+    
+    for state_code, state_name in southwest_states.items():
+        fallback_data.append({
+            'state': state_code,
+            'state_name': state_name,
+            'current_week_cases': 0,  # Conservative fallback
+            'previous_week_cases': 0,
+            'data_source': f'{state_name} Department of Health (Data temporarily unavailable)',
+            'source_url': 'N/A',
+            'last_updated': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'update_schedule': 'Weekly',
+            'epi_week': current_epi_week,
+            'epi_year': datetime.now().year,
+            'attribution': f'Data courtesy of {state_name} Department of Health'
+        })
+    
+    return pd.DataFrame(fallback_data)
+
+def get_current_epi_week(self):
+    """
+    Calculate the current CDC epidemiological week.
+    """
+    from datetime import date, timedelta
+    
+    today = date.today()
+    jan4 = date(today.year, 1, 4)
+    jan4_weekday = jan4.weekday()
+    
+    if jan4_weekday == 6:  # Jan 4 is Sunday
+        week1_sunday = jan4
+    else:
+        week1_sunday = jan4 - timedelta(days=(jan4_weekday + 1) % 7)
+    
+    days_diff = (today - week1_sunday).days
+    current_epi_week = (days_diff // 7) + 1
+    
+    return min(max(current_epi_week, 1), 53), today.year
+
+# Update your main process_data method to include the weekly data:
+
+def process_data(self):
+    """
+    Process all data including new weekly surveillance data
+    """
+    processed = {}
+    
+    # Your existing data processing...
+    # (timeline, usmeasles, mmr, usmap, vaccine_impact)
+    
+    # Add the new weekly surveillance data
+    try:
+        weekly_surveillance = self.load_weekly_surveillance_data()
+        processed['weekly_surveillance'] = weekly_surveillance
+        logging.info("Weekly surveillance data processed successfully")
+    except Exception as e:
+        logging.error(f"Error processing weekly surveillance data: {e}")
+        processed['weekly_surveillance'] = self.generate_fallback_weekly_data()
+    
+    return processed
+
+# Usage example in your main.py file:
+
+def create_weekly_surveillance_table(data_manager):
+    """
+    Create the Southwest weekly surveillance table using scraped state data.
+    """
+    try:
+        # Get current epidemiological week
+        current_epi_week, current_year = data_manager.get_current_epi_week()
+        
+        # Load the weekly surveillance data
+        weekly_data = data_manager.load_weekly_surveillance_data()
+        
+        if not weekly_data.empty:
+            # Create the table using your chart_generators function
+            fig = create_southwest_weekly_surveillance_table(
+                weekly_data=weekly_data,
+                current_epi_week=current_epi_week,
+                current_year=current_year
+            )
+            
+            # Add attribution information to the figure
+            attribution_text = "<br>".join([
+                f"• {row['state_name']}: {row['attribution']}" 
+                for _, row in weekly_data.iterrows()
+            ])
+            
+            # Add state attribution in the footer
+            fig.add_annotation(
+                text=f"<b>Data Sources:</b><br>{attribution_text}",
+                xref="paper", yref="paper",
+                x=0.02, y=-0.35,
+                showarrow=False,
+                font=dict(size=8, color='gray', family='Arial'),
+                xanchor="left", yanchor="top",
+                align="left"
+            )
+            
+            return fig
+        else:
+            logging.error("No weekly surveillance data available")
+            return None
+            
+    except Exception as e:
+        logging.error(f"Error creating weekly surveillance table: {e}")
+        return None
