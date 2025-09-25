@@ -1238,24 +1238,24 @@ def create_lives_saved_chart(vaccine_impact_data):
     df['color'] = df['bin_index'].map(lambda x: bin_colors[int(x)] if pd.notna(x) and int(x) < len(bin_colors) else bin_colors[0])
     df['bin_label'] = df['bin_index'].map(lambda x: bin_labels[int(x)] if pd.notna(x) and int(x) < len(bin_labels) else bin_labels[0])
 
-    # Font sizing system from the first graph
+    # Font sizing system matching the second function
     FONT_SIZES = {
         'title': 20,           # Chart title (if used)
         'axis_title': 16,      # Axis titles
-        'axis_tick': 14,      # Axis tick labels
+        'axis_tick': 14,       # Axis tick labels
         'legend': 14,          # Legend text
-        'annotation': 12,      # Event annotations
+        'annotation': 11,      # Event annotations - slightly smaller for mobile
         'footer': 10           # Footer/metadata text
     }
 
     FONT_FAMILY = "Arial"
 
-    # Consistent spacing system from the first graph
+    # Consistent spacing system matching the second function
     SPACING = {
-        'margin': {'l': 80, 'r': 80, 't': 100, 'b': 160},  # Increased margins for better spacing
+        'margin': {'l': 60, 'r': 40, 't': 80, 'b': 120},  # Reduced margins for mobile
         'annotation_offset': -65,   # Consistent annotation positioning
-        'legend_y': 1.15,          # Adjusted legend position for horizontal layout
-        'footer_y': -0.28          # Footer positioned with adequate spacing
+        'legend_y': 1.2,           # Legend positioned with better spacing
+        'footer_y': -0.25          # Footer positioned properly
     }
 
     fig = go.Figure()
@@ -1278,42 +1278,47 @@ def create_lives_saved_chart(vaccine_impact_data):
         showlegend=False
     ))
 
-    # Layout - no title, full screen
+    # Layout with consistent spacing
     fig.update_layout(
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family=FONT_FAMILY, size=FONT_SIZES['axis_tick'], color='black'), # Applied font family and size
-        autosize=True,  # Make responsive
-        margin=dict(l=60, r=60, t=60, b=100), # Reduced margins for full screen
+        font=dict(family=FONT_FAMILY, size=FONT_SIZES['axis_tick'], color='black'),
+        autosize=True,
+        margin=dict(
+            l=SPACING['margin']['l'], 
+            r=SPACING['margin']['r'], 
+            t=SPACING['margin']['t'], 
+            b=SPACING['margin']['b']
+        ),
         xaxis=dict(
-            title='<b>Year</b>', # Applied bold formatting to title
+            title='<b>Year</b>',
             showgrid=False,
-            linecolor='rgba(0,0,0,0)', # Set line color to transparent
-            linewidth=0, # Set linewidth to 0
-            title_font=dict(size=FONT_SIZES['axis_title'], color='black', family=FONT_FAMILY), # Applied font settings
-            tickfont=dict(size=FONT_SIZES['axis_tick'], color='black', family=FONT_FAMILY) # Applied font settings
+            linecolor='rgba(0,0,0,0)',
+            linewidth=0,
+            title_font=dict(size=FONT_SIZES['axis_title'], color='black', family=FONT_FAMILY),
+            tickfont=dict(size=FONT_SIZES['axis_tick'], color='black', family=FONT_FAMILY)
         ),
         yaxis=dict(
-            title='<b>Lives Saved (Estimated)</b>', # Applied bold formatting to title
+            title='<b>Lives Saved (Estimated)</b>',
             showgrid=False,
             tickformat=',.0f',
-            linecolor='rgba(0,0,0,0)', # Set line color to transparent
-            linewidth=0, # Set linewidth to 0
-            title_font=dict(size=FONT_SIZES['axis_title'], color='black', family=FONT_FAMILY), # Applied font settings
-            tickfont=dict(size=FONT_SIZES['axis_tick'], color='black', family=FONT_FAMILY) # Applied font settings
+            linecolor='rgba(0,0,0,0)',
+            linewidth=0,
+            title_font=dict(size=FONT_SIZES['axis_title'], color='black', family=FONT_FAMILY),
+            tickfont=dict(size=FONT_SIZES['axis_tick'], color='black', family=FONT_FAMILY)
         )
     )
 
-    # Create horizontal legend - adjust positioning for full screen
-    legend_x = 0.05  # Start legend slightly inset from left edge
-    legend_y = 0.95 # Position higher for full screen
+    # Create horizontal legend with proper positioning
+    legend_x = 0.0  # Start from left edge to match second function
+    legend_y = SPACING['legend_y']  # Use consistent spacing
     cell_height = 0.03
-    cell_width = 0.02 # Reduced cell width for horizontal layout
-    spacing = 0.005 # Further reduced spacing between colored boxes and labels
+    cell_width = 0.02
+    spacing = 0.005
 
-    # Add legend title and bins in a single line
+    # Add legend title
     legend_text = "Lives Saved Range: "
-    current_x = legend_x + 0.01 # Add a small offset to the right for the title
+    current_x = legend_x + 0.01
 
     # Add the title text
     fig.add_annotation(
@@ -1321,18 +1326,16 @@ def create_lives_saved_chart(vaccine_impact_data):
         xref="paper", yref="paper",
         x=current_x, y=legend_y + cell_height/2,
         showarrow=False,
-        font=dict(size=14, color='black', family=FONT_FAMILY),
+        font=dict(size=FONT_SIZES['legend'], color='black', family=FONT_FAMILY),
         xanchor="left", yanchor="middle"
     )
 
-    # Estimate width of the title text to position the first bin
-    # This is a rough estimate, might need fine-tuning
-    estimated_title_width_paper_units = 0.13 # Increased estimate again for "Lives Saved Range: "
-
-    current_x += estimated_title_width_paper_units + 0.005 # Increased initial offset and reduced spacing
+    # Estimate width of the title text
+    estimated_title_width_paper_units = 0.13
+    current_x += estimated_title_width_paper_units + 0.005
 
     # Show only a subset of bins in the legend for clarity if there are many
-    display_bin_indices = np.linspace(0, len(bin_labels) - 1, min(len(bin_labels), 8), dtype=int) # Display max 8 bins
+    display_bin_indices = np.linspace(0, len(bin_labels) - 1, min(len(bin_labels), 8), dtype=int)
 
     for i in display_bin_indices:
         # Add colored rectangle
@@ -1347,41 +1350,29 @@ def create_lives_saved_chart(vaccine_impact_data):
 
         # Add label
         label_text = bin_labels[i]
-        # Increase horizontal spacing for labels
-        label_x_position = current_x + cell_width + spacing # Consistent spacing
+        label_x_position = current_x + cell_width + spacing
         fig.add_annotation(
             text=label_text,
             xref="paper", yref="paper",
-            x=label_x_position, y=legend_y + cell_height/2, # Align label vertically with the center of the box
+            x=label_x_position, y=legend_y + cell_height/2,
             showarrow=False,
-            font=dict(size=14, color='black', family=FONT_FAMILY), # Applied font settings
-            xanchor="left", yanchor="middle" # Anchor to middle for vertical alignment
+            font=dict(size=FONT_SIZES['legend'], color='black', family=FONT_FAMILY),
+            xanchor="left", yanchor="middle"
         )
 
-        # Update current x position for the next item - include label width in spacing calculation
-        # Estimate label width based on number of characters
-        estimated_label_width_paper_units = len(label_text) * 0.008 # Adjust multiplier as needed
+        # Update current x position for the next item
+        estimated_label_width_paper_units = len(label_text) * 0.008
         current_x = label_x_position + estimated_label_width_paper_units + spacing
 
-    # Add timestamp at bottom for full screen layout
+    # Add footer with proper spacing matching the second function
+    last_refreshed = datetime.now().strftime('%B %d, %Y at %I:%M %p')
     fig.add_annotation(
-        text=f"<b>Last refreshed:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}",
+        text=f"<b>Last refreshed:</b> {last_refreshed}",
         xref="paper", yref="paper",
-        x=0.05, y=0.05, # Position at bottom left for full screen
+        x=0.0, y=SPACING['footer_y'],
+        xanchor="left", yanchor="top",
         showarrow=False,
-        font=dict(size=FONT_SIZES['footer'], color='gray', family=FONT_FAMILY), # Applied font settings
-        xanchor="left", yanchor="bottom", # Anchor to bottom
-        align="left"
-    )
-
-    # Add note about data nature - positioned below the timestamp
-    fig.add_annotation(
-        text="<i>Note: These are mathematical model estimates, not observed deaths</i>",
-        xref="paper", yref="paper",
-        x=0.05, y=0.02, # Positioned below timestamp at bottom
-        showarrow=False,
-        font=dict(size=FONT_SIZES['footer'] - 1, color='gray', family=FONT_FAMILY), # Slightly smaller font
-        xanchor="left", yanchor="bottom", # Anchor to bottom
+        font=dict(size=FONT_SIZES['footer'], color='gray', family=FONT_FAMILY),
         align="left"
     )
 
