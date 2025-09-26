@@ -4,8 +4,6 @@ import logging
 from pathlib import Path
 from datetime import datetime
 import pandas as pd
-
-# Import our modules
 from data_manager import DataManager
 from chart_generators import *
 from table_generators import *
