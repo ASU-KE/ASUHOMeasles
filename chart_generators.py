@@ -1034,19 +1034,21 @@ def create_bivariate_choropleth(usmap_data):
         x=legend_x + 1.5 * (cell_size + spacing),
         y=legend_y - 0.005,
         showarrow=False,
-        font=dict(size=14, color='black'),
+        font=dict(size=14, color='black', family='Arial'),
         xanchor="center", yanchor="bottom"
     )
 
-    # Vertical axis title (rotated, to the left of the grid)
+    # FIXED: Vertical axis title (rotated, to the left of the grid)
+    # Increased the left margin and adjusted positioning for better visibility
     fig.add_annotation(
         text="← Case Rate →",
         xref="paper", yref="paper",
-        x=legend_x - 0.035,
-        y=legend_y - 1.5 * (cell_size + spacing), 
+        x=legend_x - 0.015,  # Moved closer to the legend
+        y=legend_y - 1.5 * (cell_size + spacing) - 0.02,  # Better vertical centering
         showarrow=False,
-        font=dict(size=14, color='black'),
-        xanchor="center", yanchor="middle",
+        font=dict(size=14, color='black', family='Arial', weight='bold'),  # Made bold for better visibility
+        xanchor="center", 
+        yanchor="middle",
         textangle=90  # Rotate text 90 degrees
     )
 
@@ -1138,7 +1140,6 @@ def create_bivariate_choropleth(usmap_data):
     fig.add_annotation(
          text=(f"<b>Last refreshed:</b> {datetime.now().strftime('%B %d, %Y at %I:%M %p')}<br>"
               "<i>Note: Grey states are missing vaccination coverage data from the 2024-2025 school year</i>"),
-
         xref="paper", yref="paper",
         x=0.02, y=0.02,  # Position at bottom left for full screen
         showarrow=False,
@@ -1148,7 +1149,7 @@ def create_bivariate_choropleth(usmap_data):
     )
 
     return fig
-
+    
 def create_lives_saved_chart(vaccine_impact_data):
     """
     Create bar chart visualization of estimated lives saved by vaccination programs
