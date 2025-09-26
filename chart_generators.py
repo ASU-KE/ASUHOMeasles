@@ -1043,10 +1043,10 @@ def create_bivariate_choropleth(usmap_data):
     fig.add_annotation(
         text="← Case Rate →",
         xref="paper", yref="paper",
-        x=legend_x - 0.015,  # Moved closer to the legend
+        x=legend_x - 0.013,  # Moved closer to the legend
         y=legend_y - 1.5 * (cell_size + spacing) - 0.02,  # Better vertical centering
         showarrow=False,
-        font=dict(size=14, color='black', family='Arial', weight='bold'),  # Made bold for better visibility
+        font=dict(size=14, color='black', family='Arial'),  # Made bold for better visibility
         xanchor="center", 
         yanchor="middle",
         textangle=90  # Rotate text 90 degrees
